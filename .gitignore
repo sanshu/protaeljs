@@ -2,3 +2,8 @@
 /nbproject/
 /public_html/build/
 /public_html/TODO.md
+/public_html/dist/
+/config/
+/node_modules/
+/public_html/
+/build/

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>Starter : Protael</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!--JQuery and jQueryUI are required:-->
+        <link rel="stylesheet"
+              href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
+        <script type="text/javascript"
+        src="http://code.jquery.com/jquery-1.11.1.min.js"></script> 
+        <script type="text/javascript"
+        src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
+
+        <!-- Snap 0.3.0 -->
+        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.3.0/snap.svg-min.js"></script>
+
+        <link rel="stylesheet" href="css/protael.css"/>
+
+        <script type="text/javascript" src="js/protael.0.1.0.min.js"></script>
+        <script>
+            $(document)
+                .ready(function() {
+
+                    // this is your protein object
+                    var protein = {sequence:'this_is_template_sequence'};
+                    try {
+                        Protael(protein, "protaelHolder", true).draw();
+                    } catch (err) {
+                        console.log(err);
+                    }
+                });
+        </script>
+    </head>
+    <body >
+        <h1>This is a starter page for you Protael data visualization</h1>
+        <p>Edit your protein object and paste it into <code>&lt;script&gt;</code> tag the reload page. You can use Protael <a href="http://proteins.burnham.org:8080/Protael/generator.html">JSON generator</a>.</p>
+        <p>JQuery, JQueryUI and SnapSVG will be loaded from CDN.</p>
+        <!-- Protael container -->
+        <div id ="protaelHolder"> </div>
+    </body></html>
