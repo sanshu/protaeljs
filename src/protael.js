@@ -1,3 +1,7 @@
+/*
+ * Extend svg element
+ * TODO: check next snapsvg release for native implementations!
+ */
 Snap.plugin(function(Snap, Element, Paper, glob) {
     "use strict";
     var e = Element.prototype;
@@ -37,127 +41,127 @@ var Protael = (function() {
             g = "green",
             m = 'magenta',
             e = 'grey',
-        schema = {
-            'clustal': {
-                "G": o,
-                "P": o,
-                "S": o,
-                "T": o,
-                'H': r,
-                'K': r,
-                'R': r,
-                'F': b,
-                'W': b,
-                'Y': b,
-                'I': g,
-                'L': g,
-                'M': g,
-                'V': g
-            },
-            'lesk': {
-                // Small nonpolar
-                'G': o,
-                'A': o,
-                'S': o,
-                'T': o,
-                // Hydrophobic
-                'C': g,
-                'V': g,
-                'I': g,
-                'L': g,
-                'P': g,
-                'F': g,
-                'Y': g,
-                'M': g,
-                'W': g,
-                // Polar
-                'N': m,
-                'Q': m,
-                'H': m,
-                // Negatively charged
-                'D': r,
-                'E': r,
-                // Positively charged
-                'K': b,
-                'R': b
-            },
-            'maeditor': {
-                'A': 'lightgreen',
-                'G': 'lightgreen',
-                'C': g,
-                'D': 'DarkGreen',
-                'E': 'DarkGreen ',
-                'N': 'DarkGreen ',
-                'Q': 'DarkGreen ',
-                'I': b,
-                'L': b,
-                'M': b,
-                'V': b,
-                'F': '#C8A2C8',
-                'W': '#C8A2C8',
-                'Y': '#C8A2C8', // lilac
-                'H': 'DarkBlue ',
-                'K': o,
-                'R': o,
-                'P': 'pink',
-                'S': r,
-                'T': r
-            },
-            'cinema': {
-                // Polar positive
-                'H': b,
-                'K': b,
-                'R': b,
-                // Polar negative
-                'D': r,
-                'E': r,
-                // Polar neutral
-                'S': g,
-                'T': g,
-                'N': g,
-                'Q': g,
-                // Non - polar aliphatic.
-                // White is the default color, so don't need this
+            schema = {
+                'clustal': {
+                    "G": o,
+                    "P": o,
+                    "S": o,
+                    "T": o,
+                    'H': r,
+                    'K': r,
+                    'R': r,
+                    'F': b,
+                    'W': b,
+                    'Y': b,
+                    'I': g,
+                    'L': g,
+                    'M': g,
+                    'V': g
+                },
+                'lesk': {
+                    // Small nonpolar
+                    'G': o,
+                    'A': o,
+                    'S': o,
+                    'T': o,
+                    // Hydrophobic
+                    'C': g,
+                    'V': g,
+                    'I': g,
+                    'L': g,
+                    'P': g,
+                    'F': g,
+                    'Y': g,
+                    'M': g,
+                    'W': g,
+                    // Polar
+                    'N': m,
+                    'Q': m,
+                    'H': m,
+                    // Negatively charged
+                    'D': r,
+                    'E': r,
+                    // Positively charged
+                    'K': b,
+                    'R': b
+                },
+                'maeditor': {
+                    'A': 'lightgreen',
+                    'G': 'lightgreen',
+                    'C': g,
+                    'D': 'DarkGreen',
+                    'E': 'DarkGreen ',
+                    'N': 'DarkGreen ',
+                    'Q': 'DarkGreen ',
+                    'I': b,
+                    'L': b,
+                    'M': b,
+                    'V': b,
+                    'F': '#C8A2C8',
+                    'W': '#C8A2C8',
+                    'Y': '#C8A2C8', // lilac
+                    'H': 'DarkBlue ',
+                    'K': o,
+                    'R': o,
+                    'P': 'pink',
+                    'S': r,
+                    'T': r
+                },
+                'cinema': {
+                    // Polar positive
+                    'H': b,
+                    'K': b,
+                    'R': b,
+                    // Polar negative
+                    'D': r,
+                    'E': r,
+                    // Polar neutral
+                    'S': g,
+                    'T': g,
+                    'N': g,
+                    'Q': g,
+                    // Non - polar aliphatic.
+                    // White is the default color, so don't need this
 //                'A': 'white',
 //                'V': 'white',
 //                'L': 'white',
 //                'I': 'white',
 //                'M': 'white',
-                // Non - polar aromatic
-                'F': m,
-                'W': m,
-                'Y': m,
-                'P': 'brown',
-                'G': 'brown',
-                'C': 'yellow',
-                // Special characters
-                'B': e,
-                'Z': e,
-                'X': e
-            },
-            'ali': {
-                'A': e,
-                'R': e,
-                'N': e,
-                'D': e,
-                'C': e,
-                'E': e,
-                'Q': e,
-                'G': e,
-                'H': e,
-                'I': e,
-                'L': e,
-                'K': e,
-                'M': e,
-                'F': e,
-                'P': e,
-                'S': e,
-                'T': e,
-                'W': e,
-                'Y': e,
-                'V': e
-            }
-        };
+                    // Non - polar aromatic
+                    'F': m,
+                    'W': m,
+                    'Y': m,
+                    'P': 'brown',
+                    'G': 'brown',
+                    'C': 'yellow',
+                    // Special characters
+                    'B': e,
+                    'Z': e,
+                    'X': e
+                },
+                'ali': {
+                    'A': e,
+                    'R': e,
+                    'N': e,
+                    'D': e,
+                    'C': e,
+                    'E': e,
+                    'Q': e,
+                    'G': e,
+                    'H': e,
+                    'I': e,
+                    'L': e,
+                    'K': e,
+                    'M': e,
+                    'F': e,
+                    'P': e,
+                    'S': e,
+                    'T': e,
+                    'W': e,
+                    'Y': e,
+                    'V': e
+                }
+            };
         /**
          * Gets Coloring by name, or Clustal CS
          * @param {type} colorscheme
@@ -186,7 +190,7 @@ var Protael = (function() {
                 value: r.currentScale(),
                 min: .5,
                 max: 15,
-                step: .05,
+                step: .02,
                 slide: function(event, ui) {
                     r.setZoom(ui.value);
                 }
@@ -207,7 +211,7 @@ var Protael = (function() {
         }).click(function() {
             r.zoomToSelection();
         }));
-        toolbar.a('Current selection: <input type="text" class="protael_selection_inp" readonly/>');
+        toolbar.a('&nbsp;&VerticalLine;&nbsp;Selection: <input type="text" class="protael_selection_inp" readonly/>');
         toolbar.a($('<button id="export">Export</button>').button({
             text: false,
             icons: {
@@ -235,12 +239,14 @@ var Protael = (function() {
         }).click(function() {
             r.clearSelection();
         }));
-        toolbar.a('Coloring:');
+        toolbar.a('&nbsp;&VerticalLine;&nbsp;Coloring:');
         toolbar.a($(
             '<select><option>Original</option><option>Clustal</option><option>Lesk</option><option>Cinema</option><option>MAEditor</option><option>ALI</option><option>None</option></select>')
             .change(function() {
                 r.setColoringScheme($(this).val());
             }));
+
+
         if (!showControls)
             toolbar.hide();
 
@@ -258,21 +264,33 @@ var Protael = (function() {
                 }
             }
         });
+        toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($(
             '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
             .change(
                 function() {
                     r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
                 }));
+
+        toolbar.a('&nbsp;&VerticalLine;&nbsp;');
+        toolbar.a($('<button>Export SVG</button>').button({
+            text: false,
+            icons: {
+                primary: "ui-icon ui-icon-image"
+            }
+        }).click(function() {
+            r.saveAsSVG();
+        }));
         // toolbar.append('ScreenX: <input type="text" id="sx_inp" readonly/>');
         // toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
     }
 
-    function Protael(protein, container,controls) {
+    function Protael(protein, container, controls) {
         if (!(this instanceof  Protael)) {
             return new Protael(protein, container, controls);
         }
         //create dom structure; this is ugly, i know
+        //TODO: clean up this mess
         var browser = navigator.appVersion,
             self = this,
             s = '<div class="ui-widget-content protael_resizable"></div>',
@@ -290,8 +308,10 @@ var Protael = (function() {
         this.container = container;
         newDiv.append(toolbar);
         newDiv.append(svg);
+
         this.protein = protein;
         iniWidth = svg.width();
+
         this.controlsEnabled = controls;
 
         if (this.controlsEnabled) {
@@ -1334,6 +1354,11 @@ var Protael = (function() {
             });
             this.viewSet.push(r);
         };
+
+
+        paperproto.toSVGString = function() {
+            return this.paper.toString();
+        }
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
@@ -1388,6 +1413,8 @@ var Protael = (function() {
             this.clearSelection();
             return this;
         };
+
+
 
         protaelproto.setSelection = function(minx, maxx) {
             this.selectedx[0] = minx;
@@ -1497,6 +1524,22 @@ var Protael = (function() {
             return Snap.selectAll(query);
         };
 
+
+        protaelproto.toSVGString = function() {
+            return this.paper.toSVGString();
+        };
+
+        protaelproto.saveAsSVG = function() {
+            //TODO: have to separate styleg for graph elements and ui elements
+            // and use only graph styles for export
+            var prefix = '<?xml version="1.0" standalone="yes"?>\n' +
+                '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n'+
+                '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ',
+                svg = prefix + ' ' + this.toSVGString().substring(4),
+                blob = new Blob([svg], {type: "image/svg+xml"});
+            // from FileSaver.js
+            saveAs(blob, "protael_export.svg");
+        };
     }(Protael.prototype));
 
     window.Protael = Protael;

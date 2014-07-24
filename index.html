@@ -11,7 +11,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-      
+
         <!--JQuery and jQueryUI are required:-->
         <link rel="stylesheet"
               href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css">
@@ -22,13 +22,15 @@
 
         <!-- Snap 0.3.0 -->
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.3.0/snap.svg-min.js"></script>
+
+
         <link rel="stylesheet" href="css/protael.css"/>
         <script type="text/javascript" src="src/protael.js"></script>
-
 
         <script>
             $(document)
                 .ready(function() {
+                    var P;
                     $("#errorMsg").hide();
 
                     if (localStorage.testJson) {
@@ -42,7 +44,8 @@
                     var t = JSON.parse($("#codeTextArea").val());
 
                     try {
-                        Protael(t, "protaelHolder", true).draw();
+                        P = Protael(t, "protaelHolder", true).draw();
+                        saveSVG();
                     } catch (err) {
                         console.log(err);
                         $("#errorMsg").html("Unable to display protein: " + err.message);
@@ -54,7 +57,14 @@
                     $("#errorMsg").show();
                 }
             }
+
+            function saveSVG() {
+                if (!P)
+                    return;
+                console.log(P.toSVGString());
+            }
         </script>
+
     </head>
     <body >
 
@@ -110,4 +120,5 @@
             ga('create', 'UA-50502533-2', 'auto');
             ga('send', 'pageview');
         </script>
+        <script type="text/javascript" async="" src="lib/FileSaver_Blob.js"></script>
     </body></html>

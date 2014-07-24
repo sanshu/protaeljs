@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 module.exports = function(grunt) {
-
-    // Project configuration.
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         clean: ["build/", "dist/"],
         uglify: {
             options: {
-                banner: '/*! <%= pkg.name %> <%= pkg.version %> <%= grunt.template.today("yyyy-mm-dd") %> */\n'
+                banner: '/*! <%= pkg.name %> <%= pkg.version %>\n<%= grunt.template.today("yyyy-mm-dd") %> */\n'
             },
             build: {
                 src: 'src/<%= pkg.name %>.js',
                 dest: 'build/<%= pkg.name %>.<%= pkg.version %>.min.js'
             }
-        }, // make a zipfile for "download" link
+        }, 
+        // make a zipfile for "download" link
         compress: {
             main: {
                 options: {
@@ -35,6 +34,7 @@ module.exports = function(grunt) {
                 },
                 files: [
                     {expand: true, src: ['*'], cwd: 'build', dest: '<%= pkg.name %>/js'}, // minified js
+                    {expand: true, src: ['*'], cwd: 'lib', dest: '<%= pkg.name %>/js/vendor'}, // js libraries
                     {expand: true, src: ['protael.css'], cwd: 'css', dest: '<%= pkg.name %>/css', filter: 'isFile'}, // css
                     {src: ['./protaelSeed.html'], dest: '<%= pkg.name %>/'} // template
                 ]
@@ -70,7 +70,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-compress');
-
+    grunt.loadNpmTasks('grunt-contrib-concat');
 
     // Default task(s).
     grunt.registerTask('default', ['clean', 'uglify', 'compress', 'copy']);

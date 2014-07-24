@@ -20,16 +20,14 @@
 
         <!-- Snap 0.3.0 -->
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.3.0/snap.svg-min.js"></script>
-
         <link rel="stylesheet" href="css/protael.css"/>
-
         <script type="text/javascript" src="js/protael.0.1.0.min.js"></script>
         <script>
             $(document)
                 .ready(function() {
-
                     // this is your protein object
-                    var protein = {sequence:'this_is_template_sequence'};
+                    var protein = {sequence: 'this_is_template_sequence'};
+
                     try {
                         Protael(protein, "protaelHolder", true).draw();
                     } catch (err) {
@@ -40,8 +38,9 @@
     </head>
     <body >
         <h1>This is a starter page for you Protael data visualization</h1>
-        <p>Edit your protein object and paste it into <code>&lt;script&gt;</code> tag the reload page. You can use Protael <a href="http://proteins.burnham.org:8080/Protael/generator.html">JSON generator</a>.</p>
+        <p>Edit your protein object and paste it into <code>&lt;script&gt;</code> tag, then reload this page. You can use Protael <a href="http://proteins.burnham.org:8080/Protael/generator.html">JSON generator</a>.</p>
         <p>JQuery, JQueryUI and SnapSVG will be loaded from CDN.</p>
         <!-- Protael container -->
         <div id ="protaelHolder"> </div>
+        <script type="text/javascript" async="" src="js/vendor/FileSaver_Blob.js"></script>
     </body></html>
