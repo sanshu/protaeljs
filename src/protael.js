@@ -536,8 +536,7 @@ var Protael = (function() {
             }),
                 s = "m 9.943742,1.54515 0,7.665216 C 9,15 8.977801,15 6,18 5.092011,19.329493 0.900884,20.578894 0,22 -0.903141,20.578894 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
             p.path(s).attr({
-                id: "glycan",
-                fill: "#000"
+                id: "glycan"
             }).transform("scale(0.3)").toDefs();
             s = "m 9.943742,1.54515 0,7.665216 c 0.01858,0.678098 -1.8182777,4.537747 -2.31158,4.024493 L -1.548312,3.388971 -5,6.5 6.022199,18 C 5.11421,19.329493 2.03074,20.719454 1.129856,22.14056 0.226715,20.719454 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
             p.path(s).attr({
@@ -557,6 +556,23 @@ var Protael = (function() {
             thegap.add(p.line(-dx, y, 0, y - dy));
             thegap.add(p.line(dx, y, 0, y - dy));
             thegap.toDefs();
+        };
+
+        /**
+         * Adds marker definition
+         * @param {type} defpath path describing the marker
+         * @param {type} label name of the marker
+         * @returns {undefined}
+         */
+        paperproto.addDef = function(defpath, label) {
+            if (this.paper.el("use").attr({"xlink:href": "#" + label}))
+            {
+                console.log("Marker with the name '" + label + "' already exists!");
+                return;
+            }
+            this.paper.path(defpath).attr({
+                id: label
+            }).toDefs();
         };
         paperproto.createUse = function(defid, x, y, attrs) {
             var el = this.paper.el("use").attr({
@@ -1533,7 +1549,7 @@ var Protael = (function() {
             //TODO: have to separate styleg for graph elements and ui elements
             // and use only graph styles for export
             var prefix = '<?xml version="1.0" standalone="yes"?>\n' +
-                '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n'+
+                '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n' +
                 '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ',
                 svg = prefix + ' ' + this.toSVGString().substring(4),
                 blob = new Blob([svg], {type: "image/svg+xml"});
