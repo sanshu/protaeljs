@@ -815,7 +815,9 @@ var Protael = (function() {
                 seenDeltas = [],
                 lastLevel = 0,
                 ft, delta,
-                f, maxF = ftrack.features.length;
+                f,
+                dataatt,
+                maxF = ftrack.features.length;
 
             this.gFTracks.add(g);
             seenDeltas.push(0);
@@ -824,10 +826,15 @@ var Protael = (function() {
                 for (f = 0; f < maxF; f++) {
                     ft = ftrack.features[f];
                     if (ft) {
-                        featureGroup = this.feature(ft, ft.color || color, display,
+                        var featureGroup = this.feature(ft, ft.color || color, display,
                             topY, height, g, showLabels, allowOverlaps, isOverlay);
                         if (ft.click) {
                             featureGroup.click(ft.click(ft.dbxrefs));
+                        }
+
+                        if (ft.data) {
+                            dataatt = dataAttrToDataStar(ft.data);
+                            featureGroup.attr(dataatt);
                         }
                     }
                 }
@@ -854,7 +861,10 @@ var Protael = (function() {
                             if (ft.click) {
                                 featureGroup.click(ft.click);
                             }
-
+                            if (ft.data) {
+                                dataatt = dataAttrToDataStar(ft.data);
+                                featureGroup.attr(dataatt);
+                            }
                             lastX = ft.end;
                             lastLevel = ft.draw_level;
                         } else {
@@ -965,17 +975,15 @@ var Protael = (function() {
                 smooth = false,
                 X, Y, W = this.protael.W,
                 paper = this.paper;
-//            console.log(max);
-//            console.log(min);
             for (i = qtrack.values.length; i <= width; i++) {
                 qtrack.values[i] = 0;
             }
 
             //TODO: use only one property instead of two
-            if (!qtrack.values && qtrack.data) {
-                qtrack.values = (qtrack.data.indexOf(',') > 0) ? qtrack.data
-                    .split(',') : qtrack.data.split('');
-            }
+//            if (!qtrack.values && qtrack.data) {
+//                qtrack.values = (qtrack.data.indexOf(',') > 0) ? qtrack.data
+//                    .split(',') : qtrack.data.split('');
+//            }
 
             qtrack.values.splice(0, 0, 0);
 
@@ -1043,6 +1051,10 @@ var Protael = (function() {
                 cLine = paper.line(0, topY + max * ky, W, topY + max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, topY + height, W, topY + height).attr({"class": "pl-chart-bottom"}),
                 g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label});
+
+            if (qtrack.data) {
+                g.attr(dataAttrToDataStar(qtrack.data));
+            }
             this.gQTracks.add(g);
             this.viewSet.push(topLine);
             this.viewSet.push(bottomLine);
@@ -1058,7 +1070,6 @@ var Protael = (function() {
                 id: "gMarkers"
             }),
                 i,
-                maxI = markers.length,
                 m,
                 shift,
                 type,
@@ -1069,7 +1080,8 @@ var Protael = (function() {
                     "font-size": "10px",
                     "font-family": "Arial",
                     "text-anchor": "middle"
-                };
+                },
+            dataatt;
             for (i = markers.length; i--; ) {
                 m = markers[i];
                 shift = (m.position === 'bottom') ? 26 : 0;
@@ -1080,6 +1092,11 @@ var Protael = (function() {
                     id: id,
                     title: m.label ? m.label : ""
                 });
+
+                if (m.data) {
+                    dataatt = dataAttrToDataStar(m.data);
+                    mark.attr(dataatt);
+                }
                 if (m.label) {
                     shift = (m.position === 'bottom') ? 45 : 0;
                     t = this.paper.text(m.x, topY + shift, m.label).attr(att);
@@ -1097,7 +1114,7 @@ var Protael = (function() {
                     });
                 markerGp.add(mark);
             }
-        }
+        };
 
         paperproto.proteinBridges = function(bridges, topY) {
             var group = this.paper.g().attr({
@@ -1108,7 +1125,8 @@ var Protael = (function() {
                 bridgeH = 12,
                 b, gb,
                 att = {}, att2 = {fill: "white", stroke: "white"},
-            s, e, c, ls, le,
+            dataatt,
+                s, e, c, ls, le,
                 lc1, t, lc2;
 //TODO: micro-opt
             for (var i in bridges) {
@@ -1116,6 +1134,11 @@ var Protael = (function() {
                 gb = paper.g().attr({
                     id: "bridge_" + i
                 });
+
+                if (b.data) {
+                    dataatt = dataAttrToDataStar(b.data);
+                    gb.attr(dataatt);
+                }
                 att = {};
                 if (b.color) {
                     att = {
@@ -1371,9 +1394,30 @@ var Protael = (function() {
             this.viewSet.push(r);
         };
 
-
+        /**
+         * Returns content of the paper as SVG string
+         * @returns {_L398.paperproto@pro;paper@call;toString}
+         */
         paperproto.toSVGString = function() {
             return this.paper.toString();
+        };
+
+        /**
+         * Convert data attributes of JSON object to data-* HTML5 attributes.
+         * @param {type} data
+         * @returns {unresolved}
+         */
+        function dataAttrToDataStar(data) {
+            var key, newkey, val, res = {};
+
+            for (key in data) {
+                if (data.hasOwnProperty(key)) {
+                    val = data[key];
+                    newkey = "data-" + key.toLowerCase().replace(/[^a-z0-9]/gmi, "-").replace(/\s+/g, "-");
+                    res[newkey] = val;
+                }
+            }
+            return res;
         }
     }(Paper.prototype));
     Protael.Paper = Paper;

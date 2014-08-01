@@ -1,0 +1,337 @@
+{
+    "sequence": "                              TEKLWVTVYYGVPVWKEATTTLFCASDAKAYDTEVHNVWATHACVPTDPNPQEVVLVNVTENFNMWKNDMVEQMHEDIISLWDQSLKPCVKLTPLCVSLKCTDLKNDTNTNSSSGRMIMEKGEIKNCSFNISTSIRGKVQKEYAFFYKLDIIPIDNDTTSYKLTSCNTSVITQACPKVSFEPIPIHYCAPAGFAILKCNNKTFNGTGPCTNVSTVQCTHGIRPVVSTQLLLNGSLAEEEVVIRSVNFTDNAKTIIVQLNTSVEINCTRPNNNTRKRIRIQRGPGRAFVTIGKIGNMRQAHCNISRAKWNNTLKQIASKLREQFGNNKTIIFKQSSGGDPEIVTHSFNCGGEFFYCNSTQLFNSTWFNSTWSTEGSNNTEGSDTITLPCRIKQIINMWQKVGKAMYAPPISGQIRCSSNITGLLLTRDGGNSNNESEIFRPGGGDMRDNWRSELYKYKVVKIEPLGVAPTKAKRRVVQREKRAVGIGALFLGFLGAAGSTMGAASMTLTVQARQLLSGIVQQQNNLLRAIEAQQHLLQLTVWGIKQLQARILAVERYLKDQQLLGIWGCSGKLICTTAVPWNASWSNKSLEQIWNHTTWMEWDREINNYTSLIHSLIEESQNQQEKNEQELLELD",
+    "ftracks": [
+        {
+            "label": "PFAM_DOMAINS",
+            "display": "block",
+            "showLine": true,
+            "features": [
+                {
+                    "id": "PF14259",
+                    "label": "PF14259",
+                    "clazz": "pfam_feature",
+                    "start": 151,
+                    "end": 225,
+                    "data": {
+                        "Full name": "RRM_6",
+                        "description": "No description"
+                    }
+                    
+                },
+                {
+                    "regionType": "PFAM_DOMAIN",
+                    "start": 261,
+                    "end": 331,
+                    "clazz": "pfam_feature",
+                    "data": {
+                        "Full name": "RRM_1"
+                    },
+                    "dbxrefs": {
+                        "PFAM": "http://pfam.janelia.org/family/RRM_1"
+                    },
+                    "label": "PF00076",
+                    "description": "No description"
+                },
+                {
+                    "regionType": "PFAM_DOMAIN",
+                    "start": 399,
+                    "end": 460,
+                    "data": {
+                        "Full name": "RRM_1"
+                    },
+                    "dbxrefs": {
+                        "PFAM": "http://pfam.janelia.org/family/RRM_4"
+                    },
+                    "label": "PF00076",
+                    "description": "No description"
+                }
+            ]
+        }
+
+    ],
+    "markers": [
+        {
+            "type": "gap",
+            "x": 511.5,
+            "label": "511*512",
+            "color": "#1240ab",
+            "data": {
+                "Desc": "Gap at 511 position"
+            }
+        },
+        {
+            "type": "glycan",
+            "x": 88,
+            "data": {
+                "Desc": "Glycan at 88 position"
+            }
+        },
+        {
+            "type": "glycan",
+            "x": 136,
+            "data": {
+                "Desc": "Glycan at 136 position"
+            }
+        },
+        {
+            "type": "glycan",
+            "x": 141,
+            "data": {
+                "Desc": "Glycan at 141 position"
+            }
+        },
+        {
+            "type": "glycan",
+            "x": 156,
+            "data": {
+                "Desc": "Glycan at 156 position",
+                "Pubmed IDs": [1, 2, 3]
+            }
+        },
+        {
+            "type": "glycan",
+            "x": 160,
+            "data": {
+                "Desc": "Glycan at 160 position"
+            }
+        },
+        {
+            "type": "unknownglycan",
+            "x": 186
+        },
+        {
+            "type": "glycan",
+            "x": 190
+        },
+        {
+            "type": "glycan",
+            "x": 197
+        },
+        {
+            "type": "oliglycan",
+            "x": 230
+        },
+        {
+            "type": "oliglycan",
+            "x": 241
+        },
+        {
+            "type": "glycan",
+            "x": 276
+        },
+        {
+            "type": "oliglycan",
+            "x": 295
+        },
+        {
+            "type": "glycan",
+            "x": 301
+        },
+        {
+            "type": "oliglycan",
+            "x": 322,
+            "color": "red"
+        },
+        {
+            "type": "oliglycan",
+            "x": 339
+        },
+        {
+            "type": "glycan",
+            "x": 356
+        },
+        {
+            "type": "unknownglycan",
+            "x": 374
+        },
+        {
+            "type": "oliglycan",
+            "x": 387
+        },
+        {
+            "type": "oliglycan",
+            "x": 395
+        },
+        {
+            "type": "oliglycan",
+            "x": 404
+        },
+        {
+            "type": "unknownglycan",
+            "x": 411
+        },
+        {
+            "type": "oliglycan",
+            "x": 417
+        },
+        {
+            "type": "oliglycan",
+            "x": 440
+        },
+        {
+            "type": "glycan",
+            "x": 468
+        },
+        {
+            "label": "T322N",
+            "type": "stick",
+            "x": 322,
+            "color": "red",
+            "position": "bottom"
+        },
+        {
+            "label": "I559P",
+            "type": "stick",
+            "x": 559,
+            "color": "red"
+        },
+        {
+            "type": "unknownglycan",
+            "x": 610
+        },
+        {
+            "type": "unknownglycan",
+            "x": 630
+        },
+        {
+            "type": "unknownglycan",
+            "x": 640
+        }
+    ],
+    "bridges": [
+        {
+            "type": "S-S",
+            "start": 501,
+            "end": 605,
+            "startlabel": "A501C",
+            "endlabel": "T605C",
+            "color": "red"
+        }
+    ],
+    "overlayfeatures": {
+        "label": "regions",
+        "showLabels": "true",
+        "features": [
+            {
+                "regionType": "conserved",
+                "start": 31,
+                "end": 131,
+                "label": "C1",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 132,
+                "end": 156,
+                "label": "V1",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "conserved",
+                "start": 157,
+                "end": 157,
+                "label": "",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 158,
+                "end": 196,
+                "label": "V2",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "conserved",
+                "start": 197,
+                "end": 297,
+                "label": "C2",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 298,
+                "end": 331,
+                "label": "V3",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "conserved",
+                "start": 332,
+                "end": 385,
+                "label": "C3",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 386,
+                "end": 418,
+                "label": "V4",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "conserved",
+                "start": 419,
+                "end": 459,
+                "label": "C4",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 460,
+                "end": 469,
+                "label": "V5",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "conserved",
+                "start": 470,
+                "end": 511,
+                "label": "C5",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "conserved",
+                "start": 512,
+                "end": 530,
+                "label": "",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 530,
+                "end": 600,
+                "label": "HR1",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "conserved",
+                "start": 600,
+                "end": 615,
+                "label": "",
+                "color": "#FFB300"
+            },
+            {
+                "regionType": "variable",
+                "start": 615,
+                "end": 664,
+                "label": "HR2",
+                "color": "#D94409"
+            },
+            {
+                "regionType": "mper",
+                "start": 657,
+                "end": 664,
+                "label": "mper",
+                "color": "#FFB300"
+            }
+        ]
+    },
+    "qtracks": [],
+    "dbxrefs": {},
+    "label": "BG505",
+    "description": "No description",
+    "gap": {
+        "at": 511,
+        "size": 10
+    }
+}

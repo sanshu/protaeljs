@@ -31,11 +31,16 @@
             $(document)
                 .ready(function() {
                     var P;
-                    $("#errorMsg").hide();
+                    $.getJSON('json/bnab.json', function(data) {
+                        console.log(data);
+                        P = data;
 
-                    if (localStorage.testJson) {
+                        $("#errorMsg").hide();
+                        localStorage.testJson =  JSON.stringify(P, undefined, 2);;
+//                    if (localStorage.testJson) {
                         $("#codeTextArea").val(localStorage.testJson);
-                    }
+//                    }
+                    });
                 });
             function applyJSON() {
                 $(".protael_resizable").remove();
