@@ -36,7 +36,7 @@
                         P = data;
 
                         $("#errorMsg").hide();
-                        localStorage.testJson =  JSON.stringify(P, undefined, 2);;
+                        localStorage.testJson = JSON.stringify(P, undefined, 2);
 //                    if (localStorage.testJson) {
                         $("#codeTextArea").val(localStorage.testJson);
 //                    }
@@ -50,7 +50,7 @@
 
                     try {
                         P = Protael(t, "protaelHolder", true).draw();
-                        saveSVG();
+                        localStorage.testJson = t;
                     } catch (err) {
                         console.log(err);
                         $("#errorMsg").html("Unable to display protein: " + err.message);
@@ -63,11 +63,6 @@
                 }
             }
 
-            function saveSVG() {
-                if (!P)
-                    return;
-                console.log(P.toSVGString());
-            }
         </script>
 
     </head>

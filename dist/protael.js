@@ -250,20 +250,6 @@ var Protael = (function() {
         if (!showControls)
             toolbar.hide();
 
-        $(document).tooltip({
-            track: true,
-            content: function() {
-                var element = $(this);
-                if (element.is("[data-pdb]")) {
-                    var text = element.data("pdb");
-                    return '<img src="http://www.rcsb.org/pdb/images/' + text + '_bio_r_250.jpg">';
-                } else if (element.is("[title]")) {
-                    return element.attr("title");
-                } else if (element.is("img")) {
-                    return element.attr("alt");
-                }
-            }
-        });
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($(
             '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
@@ -536,8 +522,7 @@ var Protael = (function() {
             }),
                 s = "m 9.943742,1.54515 0,7.665216 C 9,15 8.977801,15 6,18 5.092011,19.329493 0.900884,20.578894 0,22 -0.903141,20.578894 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
             p.path(s).attr({
-                id: "glycan",
-                fill: "#000"
+                id: "glycan"
             }).transform("scale(0.3)").toDefs();
             s = "m 9.943742,1.54515 0,7.665216 c 0.01858,0.678098 -1.8182777,4.537747 -2.31158,4.024493 L -1.548312,3.388971 -5,6.5 6.022199,18 C 5.11421,19.329493 2.03074,20.719454 1.129856,22.14056 0.226715,20.719454 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
             p.path(s).attr({
@@ -557,6 +542,23 @@ var Protael = (function() {
             thegap.add(p.line(-dx, y, 0, y - dy));
             thegap.add(p.line(dx, y, 0, y - dy));
             thegap.toDefs();
+        };
+
+        /**
+         * Adds marker definition
+         * @param {type} defpath path describing the marker
+         * @param {type} label name of the marker
+         * @returns {undefined}
+         */
+        paperproto.addDef = function(defpath, label) {
+            if (this.paper.el("use").attr({"xlink:href": "#" + label}))
+            {
+                console.log("Marker with the name '" + label + "' already exists!");
+                return;
+            }
+            this.paper.path(defpath).attr({
+                id: label
+            }).toDefs();
         };
         paperproto.createUse = function(defid, x, y, attrs) {
             var el = this.paper.el("use").attr({
@@ -654,8 +656,12 @@ var Protael = (function() {
                 rect.attr({"class": alignment.clazz});
             }
 
-            if (alignment.pdbid) {
-                rect.attr({"data-pdb": alignment.pdbid});
+//            if (alignment.pdbid) {
+//                rect.attr({"data-pdb": alignment.pdbid});
+//            }
+
+            if (alignment.data) {
+                rect.attr(dataAttrToDataStar(alignment.data));
             }
 
             this.seqLineCovers.add(rect);
@@ -799,7 +805,9 @@ var Protael = (function() {
                 seenDeltas = [],
                 lastLevel = 0,
                 ft, delta,
-                f, maxF = ftrack.features.length;
+                f,
+                dataatt,
+                maxF = ftrack.features.length;
 
             this.gFTracks.add(g);
             seenDeltas.push(0);
@@ -808,10 +816,15 @@ var Protael = (function() {
                 for (f = 0; f < maxF; f++) {
                     ft = ftrack.features[f];
                     if (ft) {
-                        featureGroup = this.feature(ft, ft.color || color, display,
+                        var featureGroup = this.feature(ft, ft.color || color, display,
                             topY, height, g, showLabels, allowOverlaps, isOverlay);
                         if (ft.click) {
                             featureGroup.click(ft.click(ft.dbxrefs));
+                        }
+
+                        if (ft.data) {
+                            dataatt = dataAttrToDataStar(ft.data);
+                            featureGroup.attr(dataatt);
                         }
                     }
                 }
@@ -838,7 +851,10 @@ var Protael = (function() {
                             if (ft.click) {
                                 featureGroup.click(ft.click);
                             }
-
+                            if (ft.data) {
+                                dataatt = dataAttrToDataStar(ft.data);
+                                featureGroup.attr(dataatt);
+                            }
                             lastX = ft.end;
                             lastLevel = ft.draw_level;
                         } else {
@@ -949,17 +965,15 @@ var Protael = (function() {
                 smooth = false,
                 X, Y, W = this.protael.W,
                 paper = this.paper;
-//            console.log(max);
-//            console.log(min);
             for (i = qtrack.values.length; i <= width; i++) {
                 qtrack.values[i] = 0;
             }
 
             //TODO: use only one property instead of two
-            if (!qtrack.values && qtrack.data) {
-                qtrack.values = (qtrack.data.indexOf(',') > 0) ? qtrack.data
-                    .split(',') : qtrack.data.split('');
-            }
+//            if (!qtrack.values && qtrack.data) {
+//                qtrack.values = (qtrack.data.indexOf(',') > 0) ? qtrack.data
+//                    .split(',') : qtrack.data.split('');
+//            }
 
             qtrack.values.splice(0, 0, 0);
 
@@ -997,14 +1011,12 @@ var Protael = (function() {
             }
 
             if (Array.isArray(c)) {
-                if (c.length == 1)
-                {
+                if (c.length == 1) {
                     fill = c[0];
                 } else if (c.length == 2) {
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1]);
                 }
                 else if (c.length == 3) {
-
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1] + ":" + zero + '-' + c[2]);
                 }
             }
@@ -1027,6 +1039,10 @@ var Protael = (function() {
                 cLine = paper.line(0, topY + max * ky, W, topY + max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, topY + height, W, topY + height).attr({"class": "pl-chart-bottom"}),
                 g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label});
+
+            if (qtrack.data) {
+                g.attr(dataAttrToDataStar(qtrack.data));
+            }
             this.gQTracks.add(g);
             this.viewSet.push(topLine);
             this.viewSet.push(bottomLine);
@@ -1042,7 +1058,6 @@ var Protael = (function() {
                 id: "gMarkers"
             }),
                 i,
-                maxI = markers.length,
                 m,
                 shift,
                 type,
@@ -1053,7 +1068,8 @@ var Protael = (function() {
                     "font-size": "10px",
                     "font-family": "Arial",
                     "text-anchor": "middle"
-                };
+                },
+            dataatt;
             for (i = markers.length; i--; ) {
                 m = markers[i];
                 shift = (m.position === 'bottom') ? 26 : 0;
@@ -1064,6 +1080,11 @@ var Protael = (function() {
                     id: id,
                     title: m.label ? m.label : ""
                 });
+
+                if (m.data) {
+                    dataatt = dataAttrToDataStar(m.data);
+                    mark.attr(dataatt);
+                }
                 if (m.label) {
                     shift = (m.position === 'bottom') ? 45 : 0;
                     t = this.paper.text(m.x, topY + shift, m.label).attr(att);
@@ -1081,7 +1102,7 @@ var Protael = (function() {
                     });
                 markerGp.add(mark);
             }
-        }
+        };
 
         paperproto.proteinBridges = function(bridges, topY) {
             var group = this.paper.g().attr({
@@ -1092,7 +1113,8 @@ var Protael = (function() {
                 bridgeH = 12,
                 b, gb,
                 att = {}, att2 = {fill: "white", stroke: "white"},
-            s, e, c, ls, le,
+            dataatt,
+                s, e, c, ls, le,
                 lc1, t, lc2;
 //TODO: micro-opt
             for (var i in bridges) {
@@ -1100,6 +1122,11 @@ var Protael = (function() {
                 gb = paper.g().attr({
                     id: "bridge_" + i
                 });
+
+                if (b.data) {
+                    dataatt = dataAttrToDataStar(b.data);
+                    gb.attr(dataatt);
+                }
                 att = {};
                 if (b.color) {
                     att = {
@@ -1355,9 +1382,30 @@ var Protael = (function() {
             this.viewSet.push(r);
         };
 
-
+        /**
+         * Returns content of the paper as SVG string
+         * @returns {_L398.paperproto@pro;paper@call;toString}
+         */
         paperproto.toSVGString = function() {
             return this.paper.toString();
+        };
+
+        /**
+         * Convert data attributes of JSON object to data-* HTML5 attributes.
+         * @param {type} data
+         * @returns {unresolved}
+         */
+        function dataAttrToDataStar(data) {
+            var key, newkey, val, res = {};
+
+            for (key in data) {
+                if (data.hasOwnProperty(key)) {
+                    val = data[key];
+                    newkey = "data-" + key.toLowerCase().replace(/[^a-z0-9]/gmi, "-").replace(/\s+/g, "-");
+                    res[newkey] = val;
+                }
+            }
+            return res;
         }
     }(Paper.prototype));
     Protael.Paper = Paper;
@@ -1533,7 +1581,7 @@ var Protael = (function() {
             //TODO: have to separate styleg for graph elements and ui elements
             // and use only graph styles for export
             var prefix = '<?xml version="1.0" standalone="yes"?>\n' +
-                '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n'+
+                '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n' +
                 '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ',
                 svg = prefix + ' ' + this.toSVGString().substring(4),
                 blob = new Blob([svg], {type: "image/svg+xml"});
@@ -1549,3 +1597,26 @@ var Protael = (function() {
 function ProtaelBrowser(protein, container, width, height, controls) {
     var p = Protael(protein, container, width, height, controls).draw();
 }
+;
+
+/**
+ *
+ * @returns {undefined}
+ */
+(function() {
+    $(document).tooltip({
+        track: true,
+        content: function() {
+            var element = $(this);
+            if (element.is("[data-pdb]")) {
+                var text = element.data("pdb");
+                return '<img src="http://www.rcsb.org/pdb/images/' + text + '_bio_r_250.jpg">';
+            } else if (element.is("[title]")) {
+                return element.attr("title");
+            } else if (element.is("img")) {
+                return element.attr("alt");
+            }
+        }
+    });
+
+}());

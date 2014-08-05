@@ -250,20 +250,6 @@ var Protael = (function() {
         if (!showControls)
             toolbar.hide();
 
-        $(document).tooltip({
-            track: true,
-            content: function() {
-                var element = $(this);
-                if (element.is("[data-pdb]")) {
-                    var text = element.data("pdb");
-                    return '<img src="http://www.rcsb.org/pdb/images/' + text + '_bio_r_250.jpg">';
-                } else if (element.is("[title]")) {
-                    return element.attr("title");
-                } else if (element.is("img")) {
-                    return element.attr("alt");
-                }
-            }
-        });
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($(
             '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
@@ -529,27 +515,31 @@ var Protael = (function() {
             return this.gAxes;
         };
         paperproto.createDefs = function() {
-            var p = this.paper, dx = 5, dy = 8, y = 38,
+            var p = this.paper,
+                dx = 5, dy = 8, y = 38,
                 thegap = p.g().attr({
                 id: "gap",
                 "stroke-width": 2
             }),
                 s = "m 9.943742,1.54515 0,7.665216 C 9,15 8.977801,15 6,18 5.092011,19.329493 0.900884,20.578894 0,22 -0.903141,20.578894 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
-            p.path(s).attr({
-                id: "glycan"
-            }).transform("scale(0.3)").toDefs();
+            p.path(s).transform("scale(0.3)").attr({id: "glycan"}).toDefs();
+
             s = "m 9.943742,1.54515 0,7.665216 c 0.01858,0.678098 -1.8182777,4.537747 -2.31158,4.024493 L -1.548312,3.388971 -5,6.5 6.022199,18 C 5.11421,19.329493 2.03074,20.719454 1.129856,22.14056 0.226715,20.719454 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
-            p.path(s).attr({
+            p.path(s).transform("scale(0.3)").attr({
                 id: "oliglycan"
-            }).transform("scale(0.3)").toDefs();
+            }).toDefs();
+
+
             s = "M 9.943742,1.54515 5.757162,5.359859 4,1.625 l -7,0 -2.311321,3.712778 -4.3749997,-3.792628 -5.7594933,0 5.6876008,8.190472 c 2.6545072,3.598566 6.1354302,1.259308 6.0060532,3.136425 L -3.75216,38 4,38 4,12.866878 C 4,11 7.351556,13.331595 10.006045,9.732986 L 15.693741,1.54515 z";
-            p.path(s).attr({
+            p.path(s).transform("scale(0.3) ").attr({
                 id: "unknownglycan"
-            }).transform("scale(0.3) ").toDefs();
+            }).toDefs();
+
             p.line(0, 0, 0, 12).attr({
                 id: "stick",
                 "stroke-width": 2
             }).toDefs();
+
             thegap.add(p.line(0, dy, 0, y - dy));
             thegap.add(p.line(-dx, 0, 0, dy));
             thegap.add(p.line(dx, 0, 0, dy));
@@ -579,9 +569,13 @@ var Protael = (function() {
                 x: x - 0.5,
                 y: y,
                 "xlink:href": "#" + defid
-            }).attr(attrs);
+            }),
+                r = this.paper.rect(x - .75, y, 1.5, 15).attr({opacity: 0}),
+                g = this.paper.g(r, el);
+            g.attr(attrs);
+            this.viewSet.push(r);
             this.viewSet.push(el);
-            return el;
+            return g;
         };
         paperproto.setWidth = function(width) {
             var ww, vb = this.paper.attr("viewBox");
@@ -670,8 +664,12 @@ var Protael = (function() {
                 rect.attr({"class": alignment.clazz});
             }
 
-            if (alignment.pdbid) {
-                rect.attr({"data-pdb": alignment.pdbid});
+//            if (alignment.pdbid) {
+//                rect.attr({"data-pdb": alignment.pdbid});
+//            }
+
+            if (alignment.data) {
+                rect.attr(dataAttrToDataStar(alignment.data));
             }
 
             this.seqLineCovers.add(rect);
@@ -1021,14 +1019,12 @@ var Protael = (function() {
             }
 
             if (Array.isArray(c)) {
-                if (c.length == 1)
-                {
+                if (c.length == 1) {
                     fill = c[0];
                 } else if (c.length == 2) {
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1]);
                 }
                 else if (c.length == 3) {
-
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1] + ":" + zero + '-' + c[2]);
                 }
             }
@@ -1080,23 +1076,19 @@ var Protael = (function() {
                     "font-size": "10px",
                     "font-family": "Arial",
                     "text-anchor": "middle"
-                },
-            dataatt;
+                }, r, g;
             for (i = markers.length; i--; ) {
                 m = markers[i];
                 shift = (m.position === 'bottom') ? 26 : 0;
                 type = m.type ? m.type : "glycan";
+
                 //TODO: add IDs
                 id = m.label ? "m_" + m.label : "m_" + i;
                 mark = this.createUse(type, m.x, topY + shift, {
                     id: id,
-                    title: m.label ? m.label : ""
+                    title: m.label ? m.label : type
                 });
 
-                if (m.data) {
-                    dataatt = dataAttrToDataStar(m.data);
-                    mark.attr(dataatt);
-                }
                 if (m.label) {
                     shift = (m.position === 'bottom') ? 45 : 0;
                     t = this.paper.text(m.x, topY + shift, m.label).attr(att);
@@ -1112,6 +1104,12 @@ var Protael = (function() {
                         fill: m.color,
                         stroke: m.color
                     });
+
+                if (m.data) {
+                    mark.attr(dataAttrToDataStar(m.data));
+
+                }
+
                 markerGp.add(mark);
             }
         };
@@ -1125,8 +1123,7 @@ var Protael = (function() {
                 bridgeH = 12,
                 b, gb,
                 att = {}, att2 = {fill: "white", stroke: "white"},
-            dataatt,
-                s, e, c, ls, le,
+            s, e, c, ls, le,
                 lc1, t, lc2;
 //TODO: micro-opt
             for (var i in bridges) {
@@ -1136,8 +1133,7 @@ var Protael = (function() {
                 });
 
                 if (b.data) {
-                    dataatt = dataAttrToDataStar(b.data);
-                    gb.attr(dataatt);
+                    gb.attr(dataAttrToDataStar(b.data));
                 }
                 att = {};
                 if (b.color) {
@@ -1409,14 +1405,15 @@ var Protael = (function() {
          */
         function dataAttrToDataStar(data) {
             var key, newkey, val, res = {};
-
-            for (key in data) {
-                if (data.hasOwnProperty(key)) {
-                    val = data[key];
-                    newkey = "data-" + key.toLowerCase().replace(/[^a-z0-9]/gmi, "-").replace(/\s+/g, "-");
-                    res[newkey] = val;
-                }
-            }
+//
+//            for (key in data) {
+//                if (data.hasOwnProperty(key)) {
+//                    val = data[key];
+//                    newkey = "data-" + key.toLowerCase().replace(/[^a-z0-9]/gmi, "-").replace(/\s+/g, "-");
+//                    res[newkey] = val;
+//                }
+//            }
+            res['data-d'] = JSON.stringify(data);
             return res;
         }
     }(Paper.prototype));
@@ -1471,10 +1468,9 @@ var Protael = (function() {
             // scale to fit
             this.setZoom(iniWidth / this.W);
             this.clearSelection();
+            this.initTooltips();
             return this;
         };
-
-
 
         protaelproto.setSelection = function(minx, maxx) {
             this.selectedx[0] = minx;
@@ -1600,12 +1596,42 @@ var Protael = (function() {
             // from FileSaver.js
             saveAs(blob, "protael_export.svg");
         };
+
+        protaelproto.initTooltips = function() {
+            $(document).tooltip({
+                track: true,
+                content: function() {
+                    var element = $(this);
+                    if (element.is("[data-d]")) {
+                        var data = element.data("d"), res = '<table>';
+
+                        for (var i in data) {
+                            if (i === 'pdbid') {
+                                res += '<tr><td colspan="2"><img src="http://www.rcsb.org/pdb/images/' + data[i] + '_bio_r_250.jpg"></td></tr>';
+                            } else {
+                                res += "<tr><td>" + i + ':</td><td>' + data[i] + '</td></tr>';
+                            }
+                        }
+                        res += "</table>"
+                        return res;
+                    } else if (element.is("[title]")) {
+                        return element.attr("title");
+                    } else if (element.is("img")) {
+                        return element.attr("alt");
+                    }
+                }
+            });
+        };
     }(Protael.prototype));
 
     window.Protael = Protael;
     return Protael;
-}()); // end of proteal definition
+}()); // end of protael definition
 
+/**
+ * Support old version,
+ */
 function ProtaelBrowser(protein, container, width, height, controls) {
-    var p = Protael(protein, container, width, height, controls).draw();
+    Protael(protein, container, controls).draw();
 }
+;
