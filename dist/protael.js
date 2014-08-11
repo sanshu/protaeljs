@@ -357,7 +357,7 @@ var Protael = (function() {
         this.gAxes = p.g().attr({id: "axes"}); // axes and lanels
         this.gSequences = p.g().attr({Id: "seqs"}); // sequence chars and backgrounds
         this.gFTracks = p.g().attr({id: "ftracks"}); // feature tracks
-        this.gQTracks = p.g().attr({Id: "qtracks"}); // quantitative tracks
+        this.gQTracks = p.g().attr({id: "qtracks"}); // quantitative tracks
         this.seqChars = p.g().attr({
             id: "seqChars",
             'font-family': 'monospace',
@@ -960,21 +960,28 @@ var Protael = (function() {
 
         paperproto.quantTrack = function(qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var //x = [],
+            var vv = qtrack.values,
                 i, j, jj,
                 c = qtrack.color || "#F00",
+                stroke = c,
                 fill = c,
-                max = Math.max.apply(Math, qtrack.values),
-                min = Math.min.apply(Math, qtrack.values),
+                max = Math.max.apply(Math, vv),
+                min = Math.min.apply(Math, vv),
                 zero = (-min) / (max - min) * 100,
                 path = '',
                 ky = height / (max - min),
                 y = topY,
                 smooth = false,
+                column = "column",
+                area = "area",
+                line = "line",
                 X, Y, W = this.protael.W,
-                paper = this.paper;
-            for (i = qtrack.values.length; i <= width; i++) {
-                qtrack.values[i] = 0;
+                paper = this.paper,
+                chart2;
+
+            // pad values aray with 0
+            for (i = vv.length; i <= width; i++) {
+                vv[i] = 0;
             }
 
             //TODO: use only one property instead of two
@@ -983,66 +990,101 @@ var Protael = (function() {
 //                    .split(',') : qtrack.data.split('');
 //            }
 
-            qtrack.values.splice(0, 0, 0);
-
-            qtrack.values[width] = 0;
-            if (smooth) {
-                for (j = 0, jj = W; j < jj; j++) {
-                    X = j;
-                    Y = y + height - qtrack.values[j] * ky;
-                    if (j && j !== jj - 1) {
-                        var X0 = (j - 1),
-                            Y0 = y + height - qtrack.values[j - 1] * ky,
-                            X2 = (j + 1),
-                            Y2 = y + height - qtrack.values[j + 1] * ky,
-                            a = getAnchors(X0, Y0, X, Y, X2, Y2);
-                        path = path + 'C'
-                            + ([a.x1, a.y1, X, Y, a.x2, a.y2]).join(',');
-                    }
-
-                    if (!j) {
-                        path = path + "M0 " + (topY + height) + " C" + X + ' ' + Y;
-                    }
-                }
-            }
-            else {
-                for (j = 0; j < W; j++) {
-                    X = j;
-                    Y = y + height - (qtrack.values[j] - min) * ky;
-                    if (j && j !== jj - 1) {
-                        path = path + "L" + X + ", " + Y;
-                    }
-                    if (!j) {
-                        path = path + "M0 " + (topY + height + min * ky);
-                    }
-                }
-            }
+            vv.splice(0, 0, 0);
+            vv[width] = 0;// bring back to zero
 
             if (Array.isArray(c)) {
-                if (c.length == 1) {
+                stroke = c[0];
+                if (c.length === 1) {
                     fill = c[0];
-                } else if (c.length == 2) {
+                } else if (c.length === 2) {
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1]);
                 }
-                else if (c.length == 3) {
+                else if (c.length === 3) {
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1] + ":" + zero + '-' + c[2]);
                 }
             }
 
-            path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
-            var chart2 = paper.path(path).attr({
-                stroke: c,
-                "stroke-width": 0.1,
-                "stroke-linejoin": "round",
-                "stroke-linecap": "butt",
-                "stroke-dasharray": "",
-                fill: fill,
-                opacity: ".7"
-            }),
-                label = paper.text(.1, topY + 8, qtrack.label).attr({
-                "font-size": "10px",
-                "text-anchor": "start"
-            }),
+            if (!qtrack.type || qtrack.type !== column || qtrack.type === area || qtrack.type === line) {
+                if (smooth) {
+                    for (j = 0, jj = W; j < jj; j++) {
+                        X = j;
+                        Y = y + height - vv[j] * ky;
+                        if (j && j !== jj - 1) {
+                            var X0 = (j - 1),
+                                Y0 = y + height - vv[j - 1] * ky,
+                                X2 = (j + 1),
+                                Y2 = y + height - vv[j + 1] * ky,
+                                a = getAnchors(X0, Y0, X, Y, X2, Y2);
+                            path = path + 'C'
+                                + ([a.x1, a.y1, X, Y, a.x2, a.y2]).join(',');
+                        }
+
+                        if (!j) {
+                            path = path + "M0 " + (topY + height) + " C" + X + ' ' + Y;
+                        }
+                    }
+                }
+                else {
+                    for (j = 0; j < W; j++) {
+                        X = j;
+                        Y = y + height - (vv[j] - min) * ky;
+                        if (j && j !== jj - 1) {
+                            path = path + "L" + X + ", " + Y;
+                        }
+                        if (!j) {
+                            path = path + "M0 " + (topY + height + min * ky);
+                        }
+                    }
+                }
+
+                path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
+                chart2 = paper.path(path).attr({
+                    stroke: fill,
+                    "fill": fill,
+                    "class": "pl-chart-area"
+                });
+                if (qtrack.type === line) {
+                    //TODO: need spline here!
+                    chart2.attr({
+                        "fill-opacity": 0,
+                        "stroke-width": ".1px"})
+                }
+                ;
+            } else if (qtrack.type === column) {
+                // column chart
+                var rects = paper.g().attr({
+                    stroke: stroke,
+                    "fill": "orange",
+                    "class": "pl-chart-area",
+                    opacity: 1.0
+                });
+                var y0 = y + height + min * ky;
+
+                for (j = 0; j < W; j++) {
+                    X = j;
+                    var dh = 0;
+
+                    if (vv[j] >= 0) {
+                        Y = topY + (max - vv[j]) * ky;
+                        dh = vv[j] * ky;
+                    } else {
+                        Y = y0;
+                        dh = -vv[j] * ky;
+                    }
+
+                    var r = paper.rect(X, Y, 1, dh);
+                    this.viewSet.push(r);
+                    rects.add(r);
+                }
+                chart2 = paper.rect(0, topY, W, height).attr({
+                    stroke: stroke,
+                    "fill": fill,
+                    mask: rects
+                });
+            }
+
+            var label = paper.text(.1, topY + 8, qtrack.label).attr({"class": "pl-chart-label"}),
                 topLine = paper.line(0, topY, W, topY).attr({"class": "pl-chart-top"}),
                 cLine = paper.line(0, topY + max * ky, W, topY + max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, topY + height, W, topY + height).attr({"class": "pl-chart-bottom"}),
@@ -1052,9 +1094,9 @@ var Protael = (function() {
                 g.attr(dataAttrToDataStar(qtrack.data));
             }
             this.gQTracks.add(g);
+
             this.viewSet.push(topLine);
             this.viewSet.push(bottomLine);
-
             this.viewSet.push(cLine);
             this.viewSet.push(chart2);
             this.textSet.push(label);
