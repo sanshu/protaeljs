@@ -1046,11 +1046,12 @@ var Protael = (function() {
                     fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
                 }
                 else if (c.length === 3) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0]  + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
+                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
                 }
             }
 
             if (type === area || type === line || type === areaspline || type === spline) {
+                path = "M0 " + (topY + height + min * ky);
                 if (type === area || type === line) {
                     // no smoothing required, just connect the dots
                     for (j = 0; j < W; j++) {
@@ -1059,9 +1060,9 @@ var Protael = (function() {
                         if (j && j !== jj - 1) {
                             path = path + "L" + X + ", " + Y;
                         }
-                        if (!j) {
-                            path = path + "M0 " + (topY + height + min * ky);
-                        }
+//                        if (!j) {
+//                            path = path + "M0 " + (topY + height + min * ky);
+//                        }
                     }
                     path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
                 } else if (type === areaspline || type === spline) {
@@ -1078,7 +1079,7 @@ var Protael = (function() {
                     /*computes control points p1 and p2 for x and y direction*/
                     px = computeControlPoints(xx);
                     py = computeControlPoints(yy);
-                    path = "M0 " + (topY + height + min * ky);
+
                     /*updates path settings, the browser will draw the new spline*/
                     for (i = 0; i < W; i++) {
                         path +=
