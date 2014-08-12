@@ -940,22 +940,74 @@ var Protael = (function() {
             this.viewSet.push(shape);
             return shapeGr;
         };
-        // from g.raphael linechart
-        function getAnchors(p1x, p1y, p2x, p2y, p3x, p3y) {
-            var l1 = (p2x - p1x) / 2, l2 = (p3x - p2x) / 2, a = Math
-                .atan((p2x - p1x) / Math.abs(p2y - p1y)), b = Math
-                .atan((p3x - p2x) / Math.abs(p2y - p3y));
-            a = p1y < p2y ? Math.PI - a : a;
-            b = p3y < p2y ? Math.PI - b : b;
-            var alpha = Math.PI / 2 - ((a + b) % (Math.PI * 2)) / 2, dx1 = l1
-                * Math.sin(alpha + a), dy1 = l1 * Math.cos(alpha + a), dx2 = l2
-                * Math.sin(alpha + b), dy2 = l2 * Math.cos(alpha + b);
-            return {
-                x1: p2x - dx1,
-                y1: p2y + dy1,
-                x2: p2x + dx2,
-                y2: p2y + dy2
-            };
+
+        /**
+         * Creates formated path string for SVG cubic path element
+         * @param {type} x1
+         * @param {type} y1
+         * @param {type} px1
+         * @param {type} py1
+         * @param {type} px2
+         * @param {type} py2
+         * @param {type} x2
+         * @param {type} y2
+         * @returns {String}
+         */
+        paperproto.path = function(x1, y1, px1, py1, px2, py2, x2, y2) {
+            return "L" + x1 + " " + y1 + " C" + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
+        };
+
+        /*computes control points given knots K, this is the brain of the operation*/
+        function computeControlPoints(K) {
+            var i, m,
+                p1 = new Array(),
+                p2 = new Array(),
+                n = K.length - 1,
+                /*rhs vector*/
+                a = new Array(),
+                b = new Array(),
+                c = new Array(),
+                r = new Array();
+
+            /*left most segment*/
+            a[0] = 0;
+            b[0] = 2;
+            c[0] = 1;
+            r[0] = K[0] + 2 * K[1];
+
+            /*internal segments*/
+            for (i = 1; i < n - 1; i++) {
+                a[i] = 1;
+                b[i] = 4;
+                c[i] = 1;
+                r[i] = 4 * K[i] + 2 * K[i + 1];
+            }
+
+            /*right segment*/
+            a[n - 1] = 2;
+            b[n - 1] = 7;
+            c[n - 1] = 0;
+            r[n - 1] = 8 * K[n - 1] + K[n];
+
+            /*solves Ax=b with the Thomas algorithm (from Wikipedia)*/
+            for (i = 1; i < n; i++) {
+                m = a[i] / b[i - 1];
+                b[i] = b[i] - m * c[i - 1];
+                r[i] = r[i] - m * r[i - 1];
+            }
+
+            p1[n - 1] = r[n - 1] / b[n - 1];
+            for (i = n - 2; i >= 0; --i) {
+                p1[i] = (r[i] - c[i] * p1[i + 1]) / b[i];
+            }
+
+            /*we have p1, now compute p2*/
+            for (i = 0; i < n - 1; i++) {
+                p2[i] = 2 * K[i + 1] - p1[i + 1];
+            }
+            p2[n - 1] = 0.5 * (K[n] + p1[n - 1]);
+
+            return {p1: p1, p2: p2};
         }
 
         paperproto.quantTrack = function(qtrack, topY, width, height) {
@@ -963,7 +1015,6 @@ var Protael = (function() {
             var vv = qtrack.values,
                 i, j, jj,
                 c = qtrack.color || "#F00",
-                stroke = c,
                 fill = c,
                 max = Math.max.apply(Math, vv),
                 min = Math.min.apply(Math, vv),
@@ -971,10 +1022,14 @@ var Protael = (function() {
                 path = '',
                 ky = height / (max - min),
                 y = topY,
-                smooth = false,
+                // different achart types
+                spline = "spline",
                 column = "column",
                 area = "area",
+                areaspline = "area-spline",
                 line = "line",
+                type = qtrack.type || areaspline,
+                //
                 X, Y, W = this.protael.W,
                 paper = this.paper,
                 chart2;
@@ -984,48 +1039,20 @@ var Protael = (function() {
                 vv[i] = 0;
             }
 
-            //TODO: use only one property instead of two
-//            if (!qtrack.values && qtrack.data) {
-//                qtrack.values = (qtrack.data.indexOf(',') > 0) ? qtrack.data
-//                    .split(',') : qtrack.data.split('');
-//            }
-
-            vv.splice(0, 0, 0);
-            vv[width] = 0;// bring back to zero
-
             if (Array.isArray(c)) {
-                stroke = c[0];
                 if (c.length === 1) {
                     fill = c[0];
                 } else if (c.length === 2) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1]);
+                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
                 }
                 else if (c.length === 3) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + '-' + c[1] + ":" + zero + '-' + c[2]);
+                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0]  + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
                 }
             }
 
-            if (!qtrack.type || qtrack.type !== column || qtrack.type === area || qtrack.type === line) {
-                if (smooth) {
-                    for (j = 0, jj = W; j < jj; j++) {
-                        X = j;
-                        Y = y + height - vv[j] * ky;
-                        if (j && j !== jj - 1) {
-                            var X0 = (j - 1),
-                                Y0 = y + height - vv[j - 1] * ky,
-                                X2 = (j + 1),
-                                Y2 = y + height - vv[j + 1] * ky,
-                                a = getAnchors(X0, Y0, X, Y, X2, Y2);
-                            path = path + 'C'
-                                + ([a.x1, a.y1, X, Y, a.x2, a.y2]).join(',');
-                        }
-
-                        if (!j) {
-                            path = path + "M0 " + (topY + height) + " C" + X + ' ' + Y;
-                        }
-                    }
-                }
-                else {
+            if (type === area || type === line || type === areaspline || type === spline) {
+                if (type === area || type === line) {
+                    // no smoothing required, just connect the dots
                     for (j = 0; j < W; j++) {
                         X = j;
                         Y = y + height - (vv[j] - min) * ky;
@@ -1036,25 +1063,46 @@ var Protael = (function() {
                             path = path + "M0 " + (topY + height + min * ky);
                         }
                     }
+                    path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
+                } else if (type === areaspline || type === spline) {
+                    /*grab (x,y) coordinates of the control points*/
+                    var xx = new Array(),
+                        yy = new Array(), px, py;
+
+                    for (i = 0; i < W; i++) {
+                        /*use parseInt to convert string to int*/
+                        xx[i] = i;
+                        yy[i] = y + height - (vv[i] - min) * ky;
+                    }
+
+                    /*computes control points p1 and p2 for x and y direction*/
+                    px = computeControlPoints(xx);
+                    py = computeControlPoints(yy);
+                    path = "M0 " + (topY + height + min * ky);
+                    /*updates path settings, the browser will draw the new spline*/
+                    for (i = 0; i < W; i++) {
+                        path +=
+                            this.path(xx[i], yy[i], px.p1[i], py.p1[i], px.p2[i], py.p2[i], xx[i + 1], yy[i + 1]);
+                    }
+                    path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
                 }
 
-                path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
                 chart2 = paper.path(path).attr({
                     stroke: fill,
-                    "fill": fill,
+                    fill: fill,
                     "class": "pl-chart-area"
                 });
-                if (qtrack.type === line) {
-                    //TODO: need spline here!
+
+                if (type === line || type === spline) {
+                    // fill with transparent paint
                     chart2.attr({
                         "fill-opacity": 0,
-                        "stroke-width": ".1px"})
+                        "stroke-width": ".1px"});
                 }
-                ;
             } else if (qtrack.type === column) {
                 // column chart
                 var rects = paper.g().attr({
-                    stroke: stroke,
+                    stroke: fill,
                     "fill": "orange",
                     "class": "pl-chart-area",
                     opacity: 1.0
@@ -1078,10 +1126,12 @@ var Protael = (function() {
                     rects.add(r);
                 }
                 chart2 = paper.rect(0, topY, W, height).attr({
-                    stroke: stroke,
-                    "fill": fill,
+                    stroke: fill,
+                    fill: fill,
                     mask: rects
                 });
+            } else {
+                console.log("Unknown chart type :" + type);
             }
 
             var label = paper.text(.1, topY + 8, qtrack.label).attr({"class": "pl-chart-label"}),
