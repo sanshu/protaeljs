@@ -33,6 +33,10 @@ var Protael = (function() {
             graphHeight: 50,
             space: 20
         },
+    /**
+     * Object to keep coloring schemas
+     *
+     */
     ColoringSchemes = (function() {
         // see http://www.bioinformatics.nl/~berndb/aacolour.html
         var o = "orange",
@@ -287,8 +291,8 @@ var Protael = (function() {
             '<svg id="' + container + '_svgcanvas" width="100%" height="100%" preserveAspectRatio="xMinYMin meet">'
             + '<desc>Protael ' + Protael.version + '</desc>'
             + '</svg></div>',
-            svg = $(svgString)
-            ;
+            svg = $(svgString);
+
         $('#' + container).append(newDiv);
 
         this.container = container;
@@ -322,6 +326,8 @@ var Protael = (function() {
 
         this.selectSlider = $('#' + container + ' .protael_slider');
         this.selectInput = $('#' + container + " .protael_selection_inp");
+
+        // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
             .indexOf('Opera') >= 0);
         this.currScale = 1;
@@ -339,6 +345,15 @@ var Protael = (function() {
             }
         });
     }
+
+    /**
+     * Paper object for drawing.
+     * @param {type} container
+     * @param {type} w paper width
+     * @param {type} h paper height
+     * @param {type} parent Protael object reference
+     * @returns {_L26.Paper}
+     */
     function Paper(container, w, h, parent) {
         this.protael = parent;
         this.paper = Snap("#" + container + '_svgcanvas');
@@ -355,7 +370,7 @@ var Protael = (function() {
 //
         //Groups to hold different parts of the plot//
         this.gAxes = p.g().attr({id: "axes"}); // axes and lanels
-        this.gSequences = p.g().attr({Id: "seqs"}); // sequence chars and backgrounds
+        this.gSequences = p.g().attr({id: "seqs"}); // sequence chars and backgrounds
         this.gFTracks = p.g().attr({id: "ftracks"}); // feature tracks
         this.gQTracks = p.g().attr({id: "qtracks"}); // quantitative tracks
         this.seqChars = p.g().attr({
@@ -382,6 +397,13 @@ var Protael = (function() {
     }
 
     (function(paperproto) {
+        /**
+         * Sets new paper size.
+         *
+         * @param {number} w new width
+         * @param {number} h new heigt
+         * @returns {undefined}
+         */
         paperproto.setSize = function(w, h) {
             var p = this.paper, vb = p.attr("viewBox"),
                 hh = ''.concat(h).concat('px');
@@ -391,13 +413,19 @@ var Protael = (function() {
                 width: w,
                 viewBox: vb
             });
+            return this;
         };
+
+        /**
+         * Gets current paper width.
+         * @returns {number}
+         */
         paperproto.getWidth = function() {
             return this.paper.attr("width");
         };
         /**
          *
-         * @param {type} zoom - requested zoom
+         * @param {number} zoom - requested zoom
          * @returns {undefined}
          */
         paperproto.setZoom = function(zoom) {
@@ -486,8 +514,15 @@ var Protael = (function() {
             }) : this.overlayFtLabels.forEach(function(t) {
                 t.show();
             });
-        }
-        ;
+            return this;
+        };
+
+        /**
+         *
+         * @param {number} w
+         * @param {number} dx
+         * @returns {_L399.paperproto.gAxes}
+         */
         paperproto.axis = function(w, dx) {
             var i, maxI = w / dx + 1,
                 l, t,
@@ -564,6 +599,15 @@ var Protael = (function() {
                 id: label
             }).toDefs();
         };
+
+        /**
+         *
+         * @param {string} defid Marker ID
+         * @param {number} x X-coordinate
+         * @param {number} y Y -coordinate
+         * @param {object} attrs
+         * @returns {@this;@pro;paper@call;g}
+         */
         paperproto.createUse = function(defid, x, y, attrs) {
             var el = this.paper.el("use").attr({
                 x: x - 0.5,
@@ -957,7 +1001,9 @@ var Protael = (function() {
             return "L" + x1 + " " + y1 + " C" + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
         };
 
-        /*computes control points given knots K, this is the brain of the operation*/
+        /* computes control points given knots K, this is the brain of the operation
+         * From: http://www.particleincell.com/blog/2012/bezier-splines/
+         * */
         function computeControlPoints(K) {
             var i, m,
                 p1 = new Array(),
@@ -1057,7 +1103,7 @@ var Protael = (function() {
                     for (j = 0; j < W; j++) {
                         X = j;
                         Y = y + height - (vv[j] - min) * ky;
-                        if ( j !== jj - 1) {
+                        if (j !== jj - 1) {
                             path = path + "L" + X + ", " + Y;
                         }
                     }
