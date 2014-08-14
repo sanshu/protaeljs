@@ -1,5 +1,5 @@
-/*
- * Extend svg element
+/**
+ * Extend SnapSVG Element
  * TODO: check next snapsvg release for native implementations!
  */
 Snap.plugin(function(Snap, Element, Paper, glob) {
@@ -23,8 +23,16 @@ Snap.plugin(function(Snap, Element, Paper, glob) {
     };
 });
 
+/**
+ * Protael object
+ * @class
+ */
 var Protael = (function() {
     "use strict";
+    /**
+     * Current version
+     * @type {string}
+     */
     Protael.version = "0.1.0";
     var iniWidth, //initial requested width
         uiOptions = {
@@ -35,7 +43,7 @@ var Protael = (function() {
         },
     /**
      * Object to keep coloring schemas
-     *
+     * @memberOf Protael
      */
     ColoringSchemes = (function() {
         // see http://www.bioinformatics.nl/~berndb/aacolour.html
@@ -180,7 +188,8 @@ var Protael = (function() {
     }());
 
     /**
-     * Create toolbar
+     * Create toolbar.
+     * @private
      * @param {Protael} r - Protael object to hook up events
      * @param {Element} toolbar - toolbar div
      * @param {Boolean} showControls - whether or not toolbar should be visible
@@ -275,6 +284,13 @@ var Protael = (function() {
         // toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
     }
 
+    /**
+     * @constructor
+     * @memberOf Protael
+     * @param {Protein} protein Protein JSON
+     * @param {string} container ID of the container to which Protael is appended
+     * @param {boolean} controls Whether or not enabelt controls/toolbar
+     */
     function Protael(protein, container, controls) {
         if (!(this instanceof  Protael)) {
             return new Protael(protein, container, controls);
@@ -348,11 +364,17 @@ var Protael = (function() {
 
     /**
      * Paper object for drawing.
-     * @param {type} container
-     * @param {type} w paper width
-     * @param {type} h paper height
-     * @param {type} parent Protael object reference
-     * @returns {_L26.Paper}
+     * Do not use directly, this is called from Protael constructor
+     *
+     * @class Paper
+     * @memberOf Protael
+     * @private
+     * @constructor
+     * @param {string} container Parent container ID
+     * @param {number} w paper width
+     * @param {number} h paper height
+     * @param {Protael} parent Protael object reference
+     * @returns {Paper}
      */
     function Paper(container, w, h, parent) {
         this.protael = parent;
@@ -394,12 +416,18 @@ var Protael = (function() {
             "text-anchor": "start",
             id: "seqLabels"
         });
+        return this;
     }
 
+    /**
+     * @memberOf Paper
+     * @param {type} paperproto
+     * @returns {undefined}
+     */
     (function(paperproto) {
         /**
          * Sets new paper size.
-         *
+         * @memberOf Paper
          * @param {number} w new width
          * @param {number} h new heigt
          * @returns {undefined}
@@ -707,10 +735,6 @@ var Protael = (function() {
             if (alignment.clazz) {
                 rect.attr({"class": alignment.clazz});
             }
-
-//            if (alignment.pdbid) {
-//                rect.attr({"data-pdb": alignment.pdbid});
-//            }
 
             if (alignment.data) {
                 rect.attr(dataAttrToDataStar(alignment.data));
@@ -1528,7 +1552,7 @@ var Protael = (function() {
 
         /**
          * Returns content of the paper as SVG string
-         * @returns {_L398.paperproto@pro;paper@call;toString}
+         * @returns {string} SVG string representing current paper content
          */
         paperproto.toSVGString = function() {
             return this.paper.toString();
@@ -1764,8 +1788,8 @@ var Protael = (function() {
     return Protael;
 }()); // end of protael definition
 
-/**
- * Support old version,
+/*
+ * Support old version
  */
 function ProtaelBrowser(protein, container, width, height, controls) {
     Protael(protein, container, controls).draw();

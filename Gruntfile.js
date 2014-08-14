@@ -25,7 +25,17 @@ module.exports = function(grunt) {
                 src: 'src/<%= pkg.name %>.js',
                 dest: 'build/<%= pkg.name %>.<%= pkg.version %>.min.js'
             }
-        }, 
+        },
+        jsdoc : {
+            main : {
+                src: ['src/*.js', 'test/*.js'],
+                options: {
+                    destination: 'doc',
+                    configure : "./conf/jsdoc.conf.json",
+                    template : "./node_modules/grunt-jsdoc/node_modules/ink-docstrap/template"
+                }
+            }
+        },
         // make a zipfile for "download" link
         compress: {
             main: {
@@ -71,7 +81,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-compress');
     grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-jsdoc');
 
     // Default task(s).
-    grunt.registerTask('default', ['clean', 'uglify', 'compress', 'copy']);
+    grunt.registerTask('default', ['clean', 'jsdoc','uglify', 'compress', 'copy']);
 };
