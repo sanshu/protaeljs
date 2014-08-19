@@ -1,5 +1,5 @@
-/*
- * Extend svg element
+/**
+ * Extend SnapSVG Element
  * TODO: check next snapsvg release for native implementations!
  */
 Snap.plugin(function(Snap, Element, Paper, glob) {
@@ -23,8 +23,16 @@ Snap.plugin(function(Snap, Element, Paper, glob) {
     };
 });
 
+/**
+ * Protael object
+ * @class
+ */
 var Protael = (function() {
     "use strict";
+    /**
+     * Current version
+     * @type {string}
+     */
     Protael.version = "0.1.0";
     var iniWidth, //initial requested width
         uiOptions = {
@@ -33,6 +41,10 @@ var Protael = (function() {
             graphHeight: 50,
             space: 20
         },
+    /**
+     * Object to keep coloring schemas
+     * @memberOf Protael
+     */
     ColoringSchemes = (function() {
         // see http://www.bioinformatics.nl/~berndb/aacolour.html
         var o = "orange",
@@ -176,7 +188,8 @@ var Protael = (function() {
     }());
 
     /**
-     * Create toolbar
+     * Create toolbar.
+     * @private
      * @param {Protael} r - Protael object to hook up events
      * @param {Element} toolbar - toolbar div
      * @param {Boolean} showControls - whether or not toolbar should be visible
@@ -271,6 +284,13 @@ var Protael = (function() {
         // toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
     }
 
+    /**
+     * @constructor
+     * @memberOf Protael
+     * @param {Protein} protein Protein JSON
+     * @param {string} container ID of the container to which Protael is appended
+     * @param {boolean} controls Whether or not enabelt controls/toolbar
+     */
     function Protael(protein, container, controls) {
         if (!(this instanceof  Protael)) {
             return new Protael(protein, container, controls);
@@ -287,8 +307,8 @@ var Protael = (function() {
             '<svg id="' + container + '_svgcanvas" width="100%" height="100%" preserveAspectRatio="xMinYMin meet">'
             + '<desc>Protael ' + Protael.version + '</desc>'
             + '</svg></div>',
-            svg = $(svgString)
-            ;
+            svg = $(svgString);
+
         $('#' + container).append(newDiv);
 
         this.container = container;
@@ -322,6 +342,8 @@ var Protael = (function() {
 
         this.selectSlider = $('#' + container + ' .protael_slider');
         this.selectInput = $('#' + container + " .protael_selection_inp");
+
+        // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
             .indexOf('Opera') >= 0);
         this.currScale = 1;
@@ -339,6 +361,21 @@ var Protael = (function() {
             }
         });
     }
+
+    /**
+     * Paper object for drawing.
+     * Do not use directly, this is called from Protael constructor
+     *
+     * @class Paper
+     * @memberOf Protael
+     * @private
+     * @constructor
+     * @param {string} container Parent container ID
+     * @param {number} w paper width
+     * @param {number} h paper height
+     * @param {Protael} parent Protael object reference
+     * @returns {Paper}
+     */
     function Paper(container, w, h, parent) {
         this.protael = parent;
         this.paper = Snap("#" + container + '_svgcanvas');
@@ -355,7 +392,7 @@ var Protael = (function() {
 //
         //Groups to hold different parts of the plot//
         this.gAxes = p.g().attr({id: "axes"}); // axes and lanels
-        this.gSequences = p.g().attr({Id: "seqs"}); // sequence chars and backgrounds
+        this.gSequences = p.g().attr({id: "seqs"}); // sequence chars and backgrounds
         this.gFTracks = p.g().attr({id: "ftracks"}); // feature tracks
         this.gQTracks = p.g().attr({id: "qtracks"}); // quantitative tracks
         this.seqChars = p.g().attr({
@@ -379,9 +416,22 @@ var Protael = (function() {
             "text-anchor": "start",
             id: "seqLabels"
         });
+        return this;
     }
 
+    /**
+     * @memberOf Paper
+     * @param {type} paperproto
+     * @returns {undefined}
+     */
     (function(paperproto) {
+        /**
+         * Sets new paper size.
+         * @memberOf Paper
+         * @param {number} w new width
+         * @param {number} h new heigt
+         * @returns {undefined}
+         */
         paperproto.setSize = function(w, h) {
             var p = this.paper, vb = p.attr("viewBox"),
                 hh = ''.concat(h).concat('px');
@@ -391,13 +441,19 @@ var Protael = (function() {
                 width: w,
                 viewBox: vb
             });
+            return this;
         };
+
+        /**
+         * Gets current paper width.
+         * @returns {number}
+         */
         paperproto.getWidth = function() {
             return this.paper.attr("width");
         };
         /**
          *
-         * @param {type} zoom - requested zoom
+         * @param {number} zoom - requested zoom
          * @returns {undefined}
          */
         paperproto.setZoom = function(zoom) {
@@ -486,8 +542,15 @@ var Protael = (function() {
             }) : this.overlayFtLabels.forEach(function(t) {
                 t.show();
             });
-        }
-        ;
+            return this;
+        };
+
+        /**
+         *
+         * @param {number} w
+         * @param {number} dx
+         * @returns {_L399.paperproto.gAxes}
+         */
         paperproto.axis = function(w, dx) {
             var i, maxI = w / dx + 1,
                 l, t,
@@ -564,6 +627,15 @@ var Protael = (function() {
                 id: label
             }).toDefs();
         };
+
+        /**
+         *
+         * @param {string} defid Marker ID
+         * @param {number} x X-coordinate
+         * @param {number} y Y -coordinate
+         * @param {object} attrs
+         * @returns {@this;@pro;paper@call;g}
+         */
         paperproto.createUse = function(defid, x, y, attrs) {
             var el = this.paper.el("use").attr({
                 x: x - 0.5,
@@ -663,10 +735,6 @@ var Protael = (function() {
             if (alignment.clazz) {
                 rect.attr({"class": alignment.clazz});
             }
-
-//            if (alignment.pdbid) {
-//                rect.attr({"data-pdb": alignment.pdbid});
-//            }
 
             if (alignment.data) {
                 rect.attr(dataAttrToDataStar(alignment.data));
@@ -957,7 +1025,9 @@ var Protael = (function() {
             return "L" + x1 + " " + y1 + " C" + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
         };
 
-        /*computes control points given knots K, this is the brain of the operation*/
+        /* computes control points given knots K, this is the brain of the operation
+         * From: http://www.particleincell.com/blog/2012/bezier-splines/
+         * */
         function computeControlPoints(K) {
             var i, m,
                 p1 = new Array(),
@@ -1012,7 +1082,8 @@ var Protael = (function() {
 
         paperproto.quantTrack = function(qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var vv = qtrack.values,
+            var vv = Array.isArray(qtrack.values) ?
+                qtrack.values : Utils.splitData(qtrack.values),
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
@@ -1057,7 +1128,7 @@ var Protael = (function() {
                     for (j = 0; j < W; j++) {
                         X = j;
                         Y = y + height - (vv[j] - min) * ky;
-                        if ( j !== jj - 1) {
+                        if (j !== jj - 1) {
                             path = path + "L" + X + ", " + Y;
                         }
                     }
@@ -1482,7 +1553,7 @@ var Protael = (function() {
 
         /**
          * Returns content of the paper as SVG string
-         * @returns {_L398.paperproto@pro;paper@call;toString}
+         * @returns {string} SVG string representing current paper content
          */
         paperproto.toSVGString = function() {
             return this.paper.toString();
@@ -1718,8 +1789,8 @@ var Protael = (function() {
     return Protael;
 }()); // end of protael definition
 
-/**
- * Support old version,
+/*
+ * Support old version
  */
 function ProtaelBrowser(protein, container, width, height, controls) {
     Protael(protein, container, controls).draw();

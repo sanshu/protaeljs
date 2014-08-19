@@ -1082,7 +1082,8 @@ var Protael = (function() {
 
         paperproto.quantTrack = function(qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var vv = qtrack.values,
+            var vv = Array.isArray(qtrack.values) ?
+                qtrack.values : Utils.splitData(qtrack.values),
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
