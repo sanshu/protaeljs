@@ -1114,10 +1114,18 @@ var Protael = (function() {
                 if (c.length === 1) {
                     fill = c[0];
                 } else if (c.length === 2) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
+                    if (c[1] !== '') {
+                        fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
+                    }
                 }
                 else if (c.length === 3) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
+                    if (c[1] === '') {
+                        fill = c[0];
+                    } else if (c[2] === '') {
+                        fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
+                    } else {
+                        fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
+                    }
                 }
             }
 
