@@ -1437,22 +1437,26 @@ var Protael = (function() {
             counterMax = protein.qtracks ? protein.qtracks.length : 0;
 
             for (i = 0; i < counterMax; i++) {
-                this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
-                // add tooltip
-                var r = paper.rect(0, 16 + topY, 22, 20, 4, 4).attr({
-                    fill: "#000",
-                    stroke: "black",
-                    color: "white",
-                    "stroke-width": "2px",
-                    opacity: ".7"
-                }), l = paper.text(0, 30 + topY, '').attr({
-                    fill: "white"
-                });
-                this.gLabels.add(r, l);
-                qtrackLbls[i] = l;
-                qtrackBgs[i] = r;
-                protein.qtracks[i].topY = topY;
-                topY += uiOptions.graphHeight + uiOptions.space;
+                if (protein.qtracks[i].values && protein.qtracks[i].values.length) {
+                    this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
+                    // add tooltip
+                    var r = paper.rect(0, 16 + topY, 22, 20, 4, 4).attr({
+                        fill: "#000",
+                        stroke: "black",
+                        color: "white",
+                        "stroke-width": "2px",
+                        opacity: ".7"
+                    }), l = paper.text(0, 30 + topY, '').attr({
+                        fill: "white"
+                    });
+                    this.gLabels.add(r, l);
+                    qtrackLbls[i] = l;
+                    qtrackBgs[i] = r;
+                    protein.qtracks[i].topY = topY;
+                    topY += uiOptions.graphHeight + uiOptions.space;
+                } else {
+                    console.log("No values found for QTRACK [" + i + "]. Skipping.");
+                }
             }
 
             this.aliTop = topY;
@@ -1543,13 +1547,15 @@ var Protael = (function() {
                         width: l
                     });
                     for (var q in protein.qtracks) {
-                        var lb = qtrackLbls[q];
-                        var r = qtrackBgs[q];
-                        lb.node.textContent = protein.qtracks[q].values[OX];
-                        var l = lb.getBBox().width;
-                        r.attr({
-                            width: l
-                        });
+                        if (protein.qtracks[q].values) {
+                            var lb = qtrackLbls[q];
+                            var r = qtrackBgs[q];
+                            lb.node.textContent = protein.qtracks[q].values[OX];
+                            var l = lb.getBBox().width;
+                            r.attr({
+                                width: l
+                            });
+                        }
                     }
                 }
             }).mouseout(function() {
