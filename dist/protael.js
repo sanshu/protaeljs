@@ -1761,7 +1761,7 @@ var Protael = (function() {
         };
 
         protaelproto.saveAsSVG = function() {
-            //TODO: have to separate styleg for graph elements and ui elements
+            //TODO: have to separate style for graph elements and ui elements
             // and use only graph styles for export
             var prefix = '<?xml version="1.0" standalone="yes"?>\n' +
                 '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n' +
