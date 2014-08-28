@@ -1,54 +1,5 @@
 {                                  
     "sequence": "------------------------------TEKLWVTVYYGVPVWKEATTTLFCASDAKAYDTEVHNVWATHACVPTDPNPQEVVLVNVTENFNMWKNDMVEQMHEDIISLWDQSLKPCVKLTPLCVSLKCTDLKNDTNTNSSSGRMIMEKGEIKNCSFNISTSIRGKVQKEYAFFYKLDIIPIDNDTTSYKLTSCNTSVITQACPKVSFEPIPIHYCAPAGFAILKCNNKTFNGTGPCTNVSTVQCTHGIRPVVSTQLLLNGSLAEEEVVIRSVNFTDNAKTIIVQLNTSVEINCTRPNNNTRKRIRIQRGPGRAFVTIGKIGNMRQAHCNISRAKWNNTLKQIASKLREQFGNNKTIIFKQSSGGDPEIVTHSFNCGGEFFYCNSTQLFNSTWFNSTWSTEGSNNTEGSDTITLPCRIKQIINMWQKVGKAMYAPPISGQIRCSSNITGLLLTRDGGNSNNESEIFRPGGGDMRDNWRSELYKYKVVKIEPLGVAPTKAKRRVVQREKRAVGIGALFLGFLGAAGSTMGAASMTLTVQARQLLSGIVQQQNNLLRAIEAQQHLLQLTVWGIKQLQARILAVERYLKDQQLLGIWGCSGKLICTTAVPWNASWSNKSLEQIWNHTTWMEWDREINNYTSLIHSLIEESQNQQEKNEQELLELD",
-    "ftracks": [
-        {
-            "label": "PFAM_DOMAINS",
-            "display": "block",
-            "showLine": true,
-            "features": [
-                {
-                    "id": "PF14259",
-                    "label": "PF14259",
-                    "clazz": "pfam_feature",
-                    "start": 151,
-                    "end": 225,
-                    "data": {
-                        "Full name": "RRM_6",
-                        "description": "No description"
-                    }
-
-                },
-                {
-                    "regionType": "PFAM_DOMAIN",
-                    "start": 261,
-                    "end": 331,
-                    "clazz": "pfam_feature",
-                    "data": {
-                        "Full name": "RRM_1"
-                    },
-                    "dbxrefs": {
-                        "PFAM": "http://pfam.janelia.org/family/RRM_1"
-                    },
-                    "label": "PF00076",
-                    "description": "No description"
-                },
-                {
-                    "regionType": "PFAM_DOMAIN",
-                    "start": 399,
-                    "end": 460,
-                    "data": {
-                        "Full name": "RRM_1"
-                    },
-                    "dbxrefs": {
-                        "PFAM": "http://pfam.janelia.org/family/RRM_4"
-                    },
-                    "label": "PF00076",
-                    "description": "No description"
-                }
-            ]
-        }
-
-    ],
     "markers": [
         {
             "type": "gap",
