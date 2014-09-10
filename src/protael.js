@@ -34,6 +34,9 @@ var Protael = (function() {
      * @type {string}
      */
     Protael.version = "0.1.0";
+    Protael.link = "http://proteins.burnham.org:8080/Protael/";
+    Protael.linkText = "ProtaelJS";
+
     var iniWidth, //initial requested width
         uiOptions = {
             mainSeqHeight: 55,
@@ -609,6 +612,15 @@ var Protael = (function() {
             thegap.add(p.line(-dx, y, 0, y - dy));
             thegap.add(p.line(dx, y, 0, y - dy));
             thegap.toDefs();
+
+
+
+
+            // this would be slider handles
+            s = 'M8.037,11.166L14.5,22.359c0.825,1.43,2.175,1.43,3,0l6.463-11.194c0.826-1.429,0.15-2.598-1.5-2.598H9.537C7.886,8.568,7.211,9.737,8.037,11.166z'
+            p.path(s).transform("scale(0.7) ").attr({
+                id: "_slider_handle"
+            });//.toDefs();
         };
 
         /**
@@ -1092,7 +1104,6 @@ var Protael = (function() {
                 zero = (-min) / (max - min) * 100,
                 path = '',
                 ky = height / (max - min),
-                y = topY,
                 // different achart types
                 spline = "spline",
                 column = "column",
@@ -1100,7 +1111,6 @@ var Protael = (function() {
                 areaspline = "area-spline",
                 line = "line",
                 type = qtrack.type || areaspline,
-                //
                 X, Y, W = this.protael.W,
                 paper = this.paper,
                 chart2;
@@ -1130,17 +1140,17 @@ var Protael = (function() {
             }
 
             if (type === area || type === line || type === areaspline || type === spline) {
-                path = "M0 " + (topY + height + min * ky);
+                path = "M0 " + (height + min * ky);
                 if (type === area || type === line) {
                     // no smoothing required, just connect the dots
                     for (j = 0; j < W; j++) {
                         X = j;
-                        Y = y + height - (vv[j] - min) * ky;
+                        Y = height - (vv[j] - min) * ky;
                         if (j !== jj - 1) {
                             path = path + "L" + X + ", " + Y;
                         }
                     }
-                    path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
+                    path = path + 'L' + (W) + ' ' + (height + min * ky) + " Z";
                 } else if (type === areaspline || type === spline) {
                     /*grab (x,y) coordinates of the control points*/
                     var xx = new Array(),
@@ -1149,7 +1159,7 @@ var Protael = (function() {
                     for (i = 0; i < W; i++) {
                         /*use parseInt to convert string to int*/
                         xx[i] = i;
-                        yy[i] = y + height - (vv[i] - min) * ky;
+                        yy[i] = height - (vv[i] - min) * ky;
                     }
 
                     /*computes control points p1 and p2 for x and y direction*/
@@ -1161,7 +1171,7 @@ var Protael = (function() {
                         path +=
                             this.path(xx[i], yy[i], px.p1[i], py.p1[i], px.p2[i], py.p2[i], xx[i + 1], yy[i + 1]);
                     }
-                    path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
+                    path = path + 'L' + (W) + ' ' + (height + min * ky) + " Z";
                 }
 
                 chart2 = paper.path(path).attr({
@@ -1184,14 +1194,14 @@ var Protael = (function() {
                     "class": "pl-chart-area",
                     opacity: 1.0
                 });
-                var y0 = y + height + min * ky;
+                var y0 = height + min * ky;
 
                 for (j = 0; j < W; j++) {
                     X = j;
                     var dh = 0;
 
                     if (vv[j] >= 0) {
-                        Y = topY + (max - vv[j]) * ky;
+                        Y = (max - vv[j]) * ky;
                         dh = vv[j] * ky;
                     } else {
                         Y = y0;
@@ -1202,7 +1212,7 @@ var Protael = (function() {
                     this.viewSet.push(r);
                     rects.add(r);
                 }
-                chart2 = paper.rect(0, topY, W, height).attr({
+                chart2 = paper.rect(0, 0, W, height).attr({
                     stroke: fill,
                     fill: fill,
                     mask: rects
@@ -1211,11 +1221,11 @@ var Protael = (function() {
                 console.log("Unknown chart type :" + type);
             }
 
-            var label = paper.text(.1, topY + 8, qtrack.label).attr({"class": "pl-chart-label"}),
-                topLine = paper.line(0, topY, W, topY).attr({"class": "pl-chart-top"}),
-                cLine = paper.line(0, topY + max * ky, W, topY + max * ky).attr({"class": "pl-chart-center"}),
-                bottomLine = paper.line(0, topY + height, W, topY + height).attr({"class": "pl-chart-bottom"}),
-                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label});
+            var label = paper.text(.1, 8, qtrack.label).attr({"class": "pl-chart-label"}),
+                topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
+                cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
+                bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
+                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label}).transform("translate(0, " + topY + ")");
 
             if (qtrack.data) {
                 g.attr(dataAttrToDataStar(qtrack.data));
@@ -1228,7 +1238,6 @@ var Protael = (function() {
             this.viewSet.push(chart2);
             this.textSet.push(label);
         };
-
 
         paperproto.proteinMarkers = function(markers, topY) {
             var markerGp = this.paper.g().attr({
@@ -1495,9 +1504,10 @@ var Protael = (function() {
 
             // rect to show selection
 
-            this.pointer = paper.rect(0, 0, 2, this.protael.H).attr({
+            this.pointer = paper.rect(0, 0, 1, this.protael.H).attr({
                 fill: 'green',
                 stroke: 'green',
+                "stroke-width": "1px",
                 opacity: .7,
                 id: "pointer"
             });
@@ -1521,6 +1531,7 @@ var Protael = (function() {
                 id: "blanket"
             });
             this.gLabels.add(residueBg, residueLabel);
+
             paper.mousemove(function(e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
@@ -1579,15 +1590,7 @@ var Protael = (function() {
          * @returns {unresolved}
          */
         function dataAttrToDataStar(data) {
-            var key, newkey, val, res = {};
-//
-//            for (key in data) {
-//                if (data.hasOwnProperty(key)) {
-//                    val = data[key];
-//                    newkey = "data-" + key.toLowerCase().replace(/[^a-z0-9]/gmi, "-").replace(/\s+/g, "-");
-//                    res[newkey] = val;
-//                }
-//            }
+            var res = {};
             res['data-d'] = JSON.stringify(data);
             return res;
         }
