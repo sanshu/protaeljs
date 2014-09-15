@@ -612,15 +612,6 @@ var Protael = (function() {
             thegap.add(p.line(-dx, y, 0, y - dy));
             thegap.add(p.line(dx, y, 0, y - dy));
             thegap.toDefs();
-
-
-
-
-            // this would be slider handles
-            s = 'M8.037,11.166L14.5,22.359c0.825,1.43,2.175,1.43,3,0l6.463-11.194c0.826-1.429,0.15-2.598-1.5-2.598H9.537C7.886,8.568,7.211,9.737,8.037,11.166z'
-            p.path(s).transform("scale(0.7) ").attr({
-                id: "_slider_handle"
-            });//.toDefs();
         };
 
         /**
@@ -629,15 +620,20 @@ var Protael = (function() {
          * @param {type} label name of the marker
          * @returns {undefined}
          */
-        paperproto.addDef = function(defpath, label) {
+        paperproto.addDef = function(defpath, label, transform) {
             if (this.paper.el("use").attr({"xlink:href": "#" + label}))
             {
                 console.log("Marker with the name '" + label + "' already exists!");
                 return;
             }
-            this.paper.path(defpath).attr({
+            var d = this.paper.path(defpath).attr({
                 id: label
-            }).toDefs();
+            });
+            if (transform) {
+                d.transform(transform);
+            }
+
+            d.toDefs();
         };
 
         /**
@@ -1257,6 +1253,9 @@ var Protael = (function() {
                 }, r, g;
             for (i = markers.length; i--; ) {
                 m = markers[i];
+                if (! m.x  || m.x === ""){
+                    continue;
+                }
                 shift = (m.position === 'bottom') ? 26 : 0;
                 type = m.type ? m.type : "glycan";
 
@@ -1559,8 +1558,8 @@ var Protael = (function() {
                     });
                     for (var q in protein.qtracks) {
                         if (protein.qtracks[q].values) {
-                            var lb = qtrackLbls[q];
-                            var r = qtrackBgs[q];
+                            var lb = qtrackLbls[q],
+                                r = qtrackBgs[q];
                             lb.node.textContent = protein.qtracks[q].values[OX];
                             var l = lb.getBBox().width;
                             r.attr({
@@ -1574,6 +1573,9 @@ var Protael = (function() {
                 self.pointer.hide();
             });
             this.viewSet.push(r);
+
+//            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
+//            .transform("translate(0, 10)");
         };
 
         /**
@@ -1775,6 +1777,10 @@ var Protael = (function() {
             saveAs(blob, "protael_export.svg");
         };
 
+        protaelproto.addDefinition = function(defpath, label, transform) {
+            this.paper.addDef(defpath, label, transform);
+        }
+
         protaelproto.initTooltips = function() {
             $(document).tooltip({
                 track: true,
@@ -1811,5 +1817,6 @@ var Protael = (function() {
  */
 function ProtaelBrowser(protein, container, width, height, controls) {
     Protael(protein, container, controls).draw();
+
 }
 ;
