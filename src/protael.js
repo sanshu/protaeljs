@@ -728,7 +728,7 @@ var Protael = (function() {
 
             var p = this.paper,
                 self = this,
-                label = alignment.description,
+                label = alignment.description || alignment.label || alignment.id,
                 sequenceGroup = p.g().attr({id: "SG_" + label, "title": label || ''}),
                 startX = alignment.start - 1 || 0,
                 inst = this.protael,
