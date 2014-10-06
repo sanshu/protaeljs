@@ -29,6 +29,16 @@
     height: 100%
 }
 .protael_selection_inp{}
+.pl-zoomer {
+    position: absolute;
+    background: aquamarine;
+    float: left;
+    left: 5px;
+    top: 115px;
+    display: block;
+    border: green 5px;
+    width: 15px;
+}
 #xdialog {
     font-size: 50%;
 }

@@ -50,7 +50,7 @@
                     var t = JSON.parse($("#codeTextArea").val());
 
                     try {
-                        P = Protael(t, "protaelHolder", true).draw();
+                        P = Protael(t, "protaelHolder", true).draw().setColoringScheme("Clustal");
                         localStorage.testJson = t;
                     } catch (err) {
                         console.log(err);
