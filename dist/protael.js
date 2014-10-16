@@ -1534,7 +1534,7 @@ var Protael = (function() {
             paper.mousemove(function(e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
-                    c = this.container + ' #blanket',
+                    c = "#"+parent.container + ' #blanket',
                     delta = 5, x;
                 if (xoff === undefined) { // Firefox fix
                     var q = $(c);
