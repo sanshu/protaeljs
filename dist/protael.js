@@ -1036,9 +1036,7 @@ var Protael = (function () {
                 paper = this.paper;
             //      console.log("\tDrawing feature: " + feature.label);
             if (display === 'block') {
-                shape = paper.rect(s, topY, e - s, height).attr({
-                    // stroke: "#bbb"
-                });
+                shape = paper.rect(s, topY, e - s, height);
             } else if (display === 'line') {
                 shape = paper.rect(s, topY + height / 2 + 4, e - s, 3);
             }
@@ -1062,8 +1060,12 @@ var Protael = (function () {
 
             shapeGr.add(shape);
             if (showLabel) {
-                label = paper.text((s + e) / 2, topY + height - 5,
+                label = paper.text((0.5*s +0.5*e), topY + height - 5,
                     feature.label);
+                console.log("2 :" + s + '+' + e);
+
+                console.log("3 :" + (0.5*s +0.5*e) );
+
                 label.attr({stroke: 'none', 'class': 'pl-feature-label'});
                 shapeGr.append(label);
                 this.textSet.push(label);
