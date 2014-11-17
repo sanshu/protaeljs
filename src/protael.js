@@ -803,6 +803,10 @@ var Protael = (function () {
                 rect.attr({"class": alignment.clazz});
             }
 
+            if (alignment.description) {
+                alignment.data['Description'] = alignment.description;
+            }
+
             if (alignment.data) {
                 rect.attr(dataAttrToDataStar(alignment.data));
             }
@@ -893,7 +897,7 @@ var Protael = (function () {
                             }
                         } else if (ali.seqcolors) {
                             data = Utils.splitData(ali.seqcolors.data.toUpperCase());
-                            if (ali.seqcolors.colors) {
+                            if (ali.seqcolors.colors && Array.isArray(ali.seqcolors.colors)) {
                                 // USE instance colors
 
                                 for (c = chars.length; c--; ) {
@@ -1060,7 +1064,7 @@ var Protael = (function () {
 
             shapeGr.add(shape);
             if (showLabel) {
-                label = paper.text((0.5*s +0.5*e), topY + height - 5,
+                label = paper.text((0.5 * s + 0.5 * e), topY + height - 5,
                     feature.label);
 
                 label.attr({stroke: 'none', 'class': 'pl-feature-label'});
@@ -1439,7 +1443,6 @@ var Protael = (function () {
         paperproto.draw = function (protein) {
             var scolors = [],
                 chars = protein.sequence.toUpperCase().split(''),
-                // showAlignments = protein.alidisplay ? true : false, // show MAS letters?
                 topY = 35,
                 drawingTop = 20,
                 paper = this.paper,
