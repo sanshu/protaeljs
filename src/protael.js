@@ -510,7 +510,7 @@ var Protael = (function () {
                 viewBox: vb
             });
             this.pLink.attr({
-                x: w - 5, // - vbl.width-5,
+                x: w - 1, // - vbl.width-5,
                 y: h //- vbl.height-5
             });
             return this;

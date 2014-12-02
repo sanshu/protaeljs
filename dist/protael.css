@@ -75,7 +75,9 @@
 }
 /*Protael link*/
 #prref{
-    fill: #18bc9c;font-size: 8px;
+    fill: #18bc9c;
+    text-anchor:end;
+    font-size: 8px;
 }
 #prref:hover {
     cursor: pointer;
@@ -87,7 +89,7 @@ svg{
 
 /* Features*/
 .pl-ftrack{
-    text-anchor: right;
+    text-anchor: left;
     /*    font-style: normal; 
         font-variant: normal; 
         font-weight: normal; 
