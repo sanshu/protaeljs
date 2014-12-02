@@ -446,8 +446,11 @@ var Protael = (function () {
         });
         var p = this.paper; //shortcut
 
+        this.pLink = p.text(0, 0, "Powered by Protael").attr({"id":"prref"});
+        this.pLink.click(function(){window.open("http://proteins.burnham.org:8080/Protael/");});
         this.viewSet = Snap.set(); // contains all objects for scaling
         this.textSet = Snap.set(); // contains all text elements of the canvas
+        this.textSet.push(this.pLink);
         this.overlayFtLabels = Snap.set(); // contains labels for overlay features (for
         // switching views on zoomin/out)
         this.createDefs();
@@ -496,12 +499,17 @@ var Protael = (function () {
          */
         paperproto.setSize = function (w, h) {
             var p = this.paper, vb = p.attr("viewBox"),
+                vbl =  this.pLink.getBBox(),
                 hh = ''.concat(h).concat('px');
             vb.height = h;
             p.attr({
                 height: hh,
                 width: w,
                 viewBox: vb
+            });
+            this.pLink.attr ({
+                x: w -5,// - vbl.width-5,
+                y: h //- vbl.height-5
             });
             return this;
         };
@@ -1845,7 +1853,7 @@ var Protael = (function () {
 
         protaelproto.addDefinition = function (defpath, label, transform) {
             this.paper.addDef(defpath, label, transform);
-        }
+        };
 
         protaelproto.initTooltips = function () {
             $(document).tooltip({
