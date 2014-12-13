@@ -585,7 +585,7 @@ var Protael = (function () {
             // ///////////////////
             // works in Chrome only
             if (this.isChrome) {
-                var sseq = this.strechSeq
+                var sseq = this.strechSeq;
                 sseq.attr({
                     "letter-spacing": "0px"
                 }).hide();
@@ -684,9 +684,10 @@ var Protael = (function () {
         };
 
         /**
-         * Adds marker definition
+         * Adds marker definition.
          * @param {type} defpath path describing the marker
          * @param {type} label name of the marker
+         * @param {type} transform transformation string
          * @returns {undefined}
          */
         paperproto.addDef = function (defpath, label, transform) {
@@ -1872,7 +1873,7 @@ var Protael = (function () {
                                 res += "<tr><td>" + i + ':</td><td>' + data[i] + '</td></tr>';
                             }
                         }
-                        res += "</table>"
+                        res += "</table>";
                         return res;
                     } else if (element.is("[title]")) {
                         return element.attr("title");
