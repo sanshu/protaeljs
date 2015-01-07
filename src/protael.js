@@ -101,6 +101,7 @@ var Protael = (function () {
             mainSeqHeight: 55,
             featureHeight: 15, // height of the feature track
             graphHeight: 50,
+            graphSpacing: 20,
             space: 20
         },
     /**
@@ -238,15 +239,19 @@ var Protael = (function () {
             };
         /**
          * Gets Coloring by name, or Clustal CS
-         * @param {type} colorscheme
+         * @param {type} schemaName
          * @returns {schema.clustal|_L32.schema.clustal|schema|_L32.schema}
          */
-        function getCSchema(colorscheme) {
-            colorscheme = colorscheme.toLowerCase();
-            return schema[colorscheme] || schema.clustal;
+        function getCSchema(schemaName) {
+            schemaName = schemaName.toLowerCase();
+            return schema[schemaName] || schema.clustal;
         }
 
-        return {getCSchema: getCSchema};
+        function addCSchema(schemaName, schema){
+            schema[schemaName] = schemas;
+        }
+
+        return {getCSchema: getCSchema, addCSchema : addCSchema};
     }());
 
     /**
@@ -949,6 +954,10 @@ var Protael = (function () {
             }
         };
 
+        paperproto.addColoringScheme = function(name, schema){
+            ColoringSchemes.addSChema(name, schema);
+        };
+
         paperproto.featureTrack = function (ftrack, topY, height, allowOverlaps, showLabels, isOverlay) {
             //   console.log("Drawing ftrack: " + ftrack.label);
             var paper = this.paper,
@@ -975,7 +984,7 @@ var Protael = (function () {
                     ft = ftrack.features[f];
                     if (ft) {
                         var featureGroup = this.feature(ft, ft.color || color, display,
-                            topY, height, g, showLabels, allowOverlaps, isOverlay);
+                            0, height, g, showLabels, allowOverlaps, isOverlay);
                         if (ft.click) {
                             featureGroup.click(ft.click(ft.dbxrefs));
                         }
@@ -1005,7 +1014,7 @@ var Protael = (function () {
                             lastX = 0;
                         if (ft.start >= lastX) {
                             var featureGroup = this.feature(ft, ft.color || color,
-                                display, topY + delta, height, g, true, allowOverlaps, isOverlay);
+                                display, 0 + delta, height, g, true, allowOverlaps, isOverlay);
                             if (ft.click) {
                                 featureGroup.click(ft.click);
                             }
@@ -1025,7 +1034,7 @@ var Protael = (function () {
 
             if (ftrack.showLine) {
                 var d = (display === 'block') ? 0 : -height / 2 + 2,
-                    yy = 0 + topY + height / 2 - d;
+                    yy = height / 2 - d;
                 for (var delta in  seenDeltas) {
                     var dd = seenDeltas[delta],
                         line = paper.line(0, yy + dd, this.protael.W, yy + dd).attr({
@@ -1038,6 +1047,12 @@ var Protael = (function () {
                     this.viewSet.push(line);
                 }
             }
+            if (! isOverlay){
+                var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
+                g.append(label);
+            }
+            g.transform("translate(0, " + topY + ")");
+
             g.dragVertical();
             return lastLevel;
         };
@@ -1173,7 +1188,7 @@ var Protael = (function () {
                 zero = (-min) / (max - min) * 100,
                 path = '',
                 ky = height / (max - min),
-                // different achart types
+                // different chart types
                 spline = "spline",
                 column = "column",
                 area = "area",
@@ -1294,7 +1309,7 @@ var Protael = (function () {
                 topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
                 cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
-                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label}).transform("translate(0, " + topY + ")");
+                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
 
             if (qtrack.data) {
                 g.attr(dataAttrToDataStar(qtrack.data));
@@ -1311,6 +1326,8 @@ var Protael = (function () {
             this.viewSet.push(cLine);
             this.viewSet.push(chart2);
             this.textSet.push(label);
+
+            return g;
         };
 
         paperproto.proteinMarkers = function (markers, topY) {
@@ -1472,7 +1489,7 @@ var Protael = (function () {
             if (protein.overlayfeatures) {
                 var showOLbls = protein.overlayfeatures.showLabels || false;
                 this.featureTrack(protein.overlayfeatures, topY - 5, 20, true,
-                    showOLbls);
+                    showOLbls, true);
             }
             this.aliTop = topY;
             /*
@@ -1827,17 +1844,29 @@ var Protael = (function () {
             $("#" + this.container + ' .protael_zoomslider').slider("value", this.currScale);
             return this;
         };
+
+        /**
+         * Change current coloring schema
+         * @param {type} CS
+         * @returns {protael_L1722.protaelproto}
+         */
         protaelproto.setColoringScheme = function (CS) {
             this.paper.setColoringScheme(CS);
             this.CS = CS;
             return this;
         };
-
+        /**
+         * Wrapper ro Snap.slectAll to make it look more jquery-like
+         * @param {type} query
+         */
         protaelproto.select = function (query) {
             return Snap.selectAll(query);
         };
 
-
+        /**
+         * Get current vew as SVG string.
+         * @returns SVG string
+         */
         protaelproto.toSVGString = function () {
             return this.paper.toSVGString();
         };
@@ -1894,6 +1923,5 @@ var Protael = (function () {
  */
 function ProtaelBrowser(protein, container, width, height, controls) {
     Protael(protein, container, controls).draw();
-
 }
 ;
