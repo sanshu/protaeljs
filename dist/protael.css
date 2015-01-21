@@ -139,6 +139,8 @@ svg{
     fill: #000
 }
 
+.pl-chart{/*this class for marking qtrack group only, will not affect appearance*/}
+
 .pl-chart-top, .pl-chart-bottom{
     stroke:none;
     stroke-width: 1px;
@@ -154,7 +156,6 @@ svg{
     stroke-width: 0.1;
     stroke-linejoin: round;
     stroke-linecap: butt;
-    stroke-dasharray: "";
     opacity: 0.7;
 }
 
@@ -171,6 +172,10 @@ svg{
     stroke: #ccc
 }
 
+.pl-ftrack-label{ 
+    font-size: 10px;
+    text-anchor: start;
+}
 .pl-bridge {
     font-size: 10px;
     font-family: Arial;
