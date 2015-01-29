@@ -470,7 +470,7 @@ var Protael = (function () {
         this.seqChars = p.g().attr({
             id: "seqChars",
             'font-family': 'monospace',
-            'font-size': "9px",
+            'font-size': "12px",
             "text-anchor": "start",
             "letter-spacing": '0px'
         });
