@@ -1,6 +1,8 @@
 Protael
 ==============
 
+[![Join the chat at https://gitter.im/sanshu/protaeljs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/sanshu/protaeljs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Protael is a vector graphics library for displaying various biological sequence 
 related data on web pages.
 
