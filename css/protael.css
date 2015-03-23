@@ -148,7 +148,7 @@ svg{
 }
 
 .pl-chart-label{ 
-    font-size: 10px;
+    font-size: 14px;
     text-anchor: start;
 }
 
@@ -173,7 +173,7 @@ svg{
 }
 
 .pl-ftrack-label{ 
-    font-size: 10px;
+    font-size: 14px;
     text-anchor: start;
 }
 .pl-bridge {
