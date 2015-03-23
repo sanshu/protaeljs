@@ -20,10 +20,9 @@
             $(document)
                 .ready(function () {
                     var P;
-                    $.getJSON('json/overallTest.json', function (data) {
+                    $.getJSON('json/allFeaturesExample.json', function (data) {
                         console.log(data);
                         P = data;
-
                         $("#errorMsg").hide();
                         localStorage.testJson = JSON.stringify(P, undefined, 2);
 //                    if (localStorage.testJson) {
