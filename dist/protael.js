@@ -1651,7 +1651,7 @@ var Protael = (function () {
                         width: l
                     });
                     for (var q in protein.qtracks) {
-                        if (protein.qtracks[q].values) {
+                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
                             var lb = qtrackLbls[q],
                                 r = qtrackBgs[q];
                             lb.node.textContent = protein.qtracks[q].values[OX];
