@@ -838,7 +838,7 @@ var Protael = (function () {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
                 if (this.isChrome) {
                     this.strechSeq = this.paper.text(startX * inst.currentScale(), y + 8,
-                        chars.join(''));
+                        chars.join('')).hide();
                     unstrW = this.strechSeq.getBBox().width;
                     this.strechSeq.attr({
                         'uwidth': unstrW,
