@@ -826,7 +826,7 @@ var Protael = (function () {
                 alignment.data['Description'] = alignment.description;
             }
 
-            if (alignment.data) {
+            if (alignment.data && alignment.data.length >0) {
                 rect.attr(dataAttrToDataStar(alignment.data));
             }
 

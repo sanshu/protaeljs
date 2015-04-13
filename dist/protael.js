@@ -12,13 +12,16 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
         return this.prependTo(this.paper);
     };
     e.hide = function () {
+        /* need both to make sure graphics editors do not display this element */
         return this.attr({
-            'visibility': 'hidden'
+            'visibility': 'hidden',
+            'display': 'none'
         });
     };
     e.show = function () {
         return this.attr({
-            'visibility': 'visible'
+            'visibility': 'visible',
+            'display': 'inline'
         });
     };
     /*\
@@ -247,11 +250,11 @@ var Protael = (function () {
             return schema[schemaName] || schema.clustal;
         }
 
-        function addCSchema(schemaName, schema){
+        function addCSchema(schemaName, schema) {
             schema[schemaName] = schemas;
         }
 
-        return {getCSchema: getCSchema, addCSchema : addCSchema};
+        return {getCSchema: getCSchema, addCSchema: addCSchema};
     }());
 
     /**
@@ -823,7 +826,7 @@ var Protael = (function () {
                 alignment.data['Description'] = alignment.description;
             }
 
-            if (alignment.data) {
+            if (alignment.data && alignment.data.length >0) {
                 rect.attr(dataAttrToDataStar(alignment.data));
             }
 
@@ -835,7 +838,7 @@ var Protael = (function () {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
                 if (this.isChrome) {
                     this.strechSeq = this.paper.text(startX * inst.currentScale(), y + 8,
-                        chars.join(''));
+                        chars.join('')).hide();
                     unstrW = this.strechSeq.getBBox().width;
                     this.strechSeq.attr({
                         'uwidth': unstrW,
@@ -954,7 +957,7 @@ var Protael = (function () {
             }
         };
 
-        paperproto.addColoringScheme = function(name, schema){
+        paperproto.addColoringScheme = function (name, schema) {
             ColoringSchemes.addSChema(name, schema);
         };
 
@@ -1047,7 +1050,7 @@ var Protael = (function () {
                     this.viewSet.push(line);
                 }
             }
-            if (! isOverlay){
+            if (!isOverlay) {
                 var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
                 g.append(label);
             }
@@ -1877,11 +1880,55 @@ var Protael = (function () {
             var prefix = '<?xml version="1.0" standalone="yes"?>\n' +
                 '<?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n' +
                 '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ',
-                svg = prefix + ' ' + this.toSVGString().substring(4),
+                subsvg = this.toSVGString(),
+                div = document.getElementById(this.container),
+                style = "<style type='text/css'><![CDATA[\n" + styles(div) + "\n]]></style>",
+                svg = prefix + ' ' + subsvg.substring(4, subsvg.length - 6) + style + '</svg>',
                 blob = new Blob([svg], {type: "image/svg+xml"});
+            console.log(style);
             // from FileSaver.js
             saveAs(blob, "protael_export.svg");
         };
+
+
+// save all page styles as inline styles
+// see http://spin.atomicobject.com/2014/01/21/convert-svg-to-png/
+        function isExternal(url) {
+            return url && url.lastIndexOf('http', 0) == 0 && url.lastIndexOf(window.location.host) == -1;
+        }
+        ;
+        function styles(el) {
+            var css = "";
+            var sheets = document.styleSheets;
+            for (var i = 0; i < sheets.length; i++) {
+                if (isExternal(sheets[i].href)) {
+                    console.warn("Cannot include styles from other hosts: " + sheets[i].href);
+                    continue;
+                }
+                var rules = sheets[i].cssRules;
+                if (rules != null) {
+                    for (var j = 0; j < rules.length; j++) {
+                        var rule = rules[j];
+                        if (typeof (rule.style) != "undefined") {
+                            var match = null;
+                            try {
+                                match = el.querySelector(rule.selectorText);
+                            } catch (err) {
+                                console.warn('Invalid CSS selector "' + rule.selectorText + '"', err);
+                            }
+                            if (match) {
+                                var selector = rule.selectorText;
+                                css += selector + " { " + rule.style.cssText + " }\n";
+                            } else if (rule.cssText.match(/^@font-face/)) {
+                                css += rule.cssText + '\n';
+                            }
+                        }
+                    }
+                }
+            }
+            return css;
+        }
+        ;
 
         protaelproto.addDefinition = function (defpath, label, transform) {
             this.paper.addDef(defpath, label, transform);
