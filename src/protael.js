@@ -826,7 +826,7 @@ var Protael = (function () {
                 alignment.data['Description'] = alignment.description;
             }
 
-            if (alignment.data && alignment.data.length >0) {
+            if (alignment.data && alignment.data.length > 0) {
                 rect.attr(dataAttrToDataStar(alignment.data));
             }
 
@@ -988,12 +988,20 @@ var Protael = (function () {
                     if (ft) {
                         var featureGroup = this.feature(ft, ft.color || color, display,
                             0, height, g, showLabels, allowOverlaps, isOverlay);
+
+
+                        /// TODO: what is this? no idea why I wrote this
                         if (ft.click) {
                             featureGroup.click(ft.click(ft.dbxrefs));
                         }
 
                         if (ft.data) {
                             dataatt = dataAttrToDataStar(ft.data);
+                            featureGroup.attr(dataatt);
+                        }
+
+                        if (ft.dbxrefs) {
+                            dataatt = xrefsToDataStar(ft.xrefs);
                             featureGroup.attr(dataatt);
                         }
                     }
@@ -1023,6 +1031,11 @@ var Protael = (function () {
                             }
                             if (ft.data) {
                                 dataatt = dataAttrToDataStar(ft.data);
+                                featureGroup.attr(dataatt);
+                            }
+
+                            if (ft.dbxrefs) {
+                                dataatt = xrefsToDataStar(ft.xrefs);
                                 featureGroup.attr(dataatt);
                             }
                             lastX = ft.end;
@@ -1684,7 +1697,7 @@ var Protael = (function () {
         };
 
         /**
-         * Convert data attributes of JSON object to data-* HTML5 attributes.
+         * Convert xrefs attributes of JSON object to data-d HTML5 attribute.
          * @param {type} data
          * @returns {unresolved}
          */
@@ -1693,6 +1706,18 @@ var Protael = (function () {
             res['data-d'] = JSON.stringify(data);
             return res;
         }
+
+        /**
+         * Convert xrefs of JSON object to data-x HTML5 attributes.
+         * @param {type} xrefs
+         * @returns {unresolved}
+         */
+        function xrefsToDataStar(xrefs) {
+            var res = {};
+            res['data-x'] = JSON.stringify(xrefs);
+            return res;
+        }
+
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
