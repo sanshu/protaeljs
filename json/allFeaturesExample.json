@@ -28,7 +28,8 @@
         "data": "EEEEEEE SSEEEEEEE TTSSSEEEEEEEEBGGGTB  HHHHHHHHTTSEEEEEEEE    BTTB  HHHHHHHHHHHHHHHHH S EEEE  SS HHHHHHHHHHTT  HHHHHHHHHHHHHHHHHHHHHHHHT XXXXXXXXX",
         "colors": {}
       },
-      "data": {}
+      "data": {},
+      "dbxrefs" : {"ha": "gmail.com"}
     },
     {
       "CS": "ALI",
@@ -551,7 +552,90 @@
       }
     ]
   },
-  "ftracks": [],
+"ftracks": [
+    {
+      "label": "PFAM_DOMAINS",
+      "display": "block",
+      "showLine": true,
+      "clazz": "pfam_domains",
+      "features": [
+        {
+          "id": "PF14259",
+          "label": "PF14259",
+          "clazz": "pfam_feature",
+          "start": 15,
+          "end": 22,
+          "properties": {
+            "Full name": "RRM_6"
+          },
+          "description": "No description"
+        },
+        {
+          "regionType": "PFAM_DOMAIN",
+          "start": 26,
+          "end": 33,
+          "clazz": "pfam_feature",
+          "properties": {
+            "Full name": "RRM_1"
+          },
+          "dbxrefs": {
+            "PFAM": "http://pfam.janelia.org/family/RRM_1"
+          },
+          "label": "PF00076",
+          "description": "No description"
+        },
+        {
+          "regionType": "PFAM_DOMAIN",
+          "start": 39,
+          "end": 46,
+          "properties": {
+            "Full name": "RRM_1"
+          },
+          "dbxrefs": {
+            "PFAM": "http://pfam.janelia.org/family/RRM_4"
+          },
+          "label": "PF00076",
+          "description": "No description"
+        }
+      ]
+    },
+    {
+      "label": "Structures",
+      "display": "block",
+      "color": "green",
+      "showLine": true,
+      "allowOverlap": false,
+      "features": [
+        {
+          "regionType": "STRUCTURE",
+          "start": 27,
+          "end": 42,
+          "color": "pink",
+          "properties": {
+            "Full name": "2M52. Chain: A. Metod: NMR. Resolution: -"
+          },
+          "dbxrefs": {
+            "PDB": "http://www.pdb.org/pdb/explore/explore.do?structureId=2M52"
+          },
+          "label": "2M52",
+          "description": "No description"
+        },
+        {
+          "regionType": "STRUCTURE",
+          "start": 40,
+          "end": 47,
+          "properties": {
+            "Full name": "3V4M. Chain: A/B. Metod: X-ray. Resolution: 1.80 A"
+          },
+          "dbxrefs": {
+            "PDB": "http://www.pdb.org/pdb/explore/explore.do?structureId=3V4M"
+          },
+          "label": "3V4M",
+          "description": "No description"
+        }
+      ]
+    }
+  ],
   "markers": [],
   "properties": {
     "Signal peptides (length)": "0",
