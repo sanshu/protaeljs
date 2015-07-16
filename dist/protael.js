@@ -24,7 +24,6 @@ Snap.plugin(function (Snap, Element, Paper, glob) {
             'display': 'inline'
         });
     };
-
     /*\
      * Element.dragVertical
      [ method ]
@@ -1853,10 +1852,19 @@ var Protael = (function () {
         protaelproto.addDefinition = function (defpath, label, transform) {
             this.paper.addDef(defpath, label, transform);
         };
+
+        protaelproto.tooltip = function (callback) {
+            if (callback && typeof(callback) == "function"){
+                this.tooltipCallback = callback;
+            }
+            return this;
+        }
         protaelproto.initTooltips = function () {
-            $(document).tooltip({
-                track: true,
-                content: function () {
+            var actualCallback;
+            if ( this.tooltipCallback && typeof( this.tooltipCallback) == "function"){
+                actualCallback =  this.tooltipCallback;
+            } else{
+                actualCallback = function () {
                     var element = $(this);
                     if (element.is("[data-d]")) {
                         var data = element.data("d"), res = '<table>';
@@ -1874,23 +1882,26 @@ var Protael = (function () {
                     } else if (element.is("img")) {
                         return element.attr("alt");
                     }
-                }
+                };
+            }
+            $(document).tooltip({
+                track: true,
+                content:   actualCallback
             });
         };
+
+
         protaelproto.initClicks = function () {
             $("[data-x]").click(function () {
                 var element = $(this), xrefs = element.data("x");
                 if ( Object.keys(xrefs).length > 0) {
                     var html = "<table>";
                     for (var i in xrefs) {
-
                         html += "<tr><td>" + i + ':</td><td><a target="_blank" href="' + xrefs[i] + '">' + xrefs[i] + '</a</td></tr>';
-
                     }
                     html += "</table>";
                     $("#propsdialog").html(html);
                     $("#propsdialog").dialog("open");
-
                 }
 
             });
