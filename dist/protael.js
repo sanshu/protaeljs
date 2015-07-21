@@ -1854,17 +1854,10 @@ var Protael = (function () {
         };
 
         protaelproto.tooltip = function (callback) {
-            if (callback && typeof(callback) == "function"){
+            if (callback && typeof (callback) == "function") {
                 this.tooltipCallback = callback;
-            }
-            return this;
-        }
-        protaelproto.initTooltips = function () {
-            var actualCallback;
-            if ( this.tooltipCallback && typeof( this.tooltipCallback) == "function"){
-                actualCallback =  this.tooltipCallback;
-            } else{
-                actualCallback = function () {
+            } else {
+                this.tooltipCallback = function () {
                     var element = $(this);
                     if (element.is("[data-d]")) {
                         var data = element.data("d"), res = '<table>';
@@ -1884,9 +1877,15 @@ var Protael = (function () {
                     }
                 };
             }
+            return this;
+        };
+
+        protaelproto.initTooltips = function () {
+            if (! this.tooltipCallback)
+                this.tooltip(null);
             $(document).tooltip({
                 track: true,
-                content:   actualCallback
+                content: this.tooltipCallback
             });
         };
 
@@ -1894,7 +1893,7 @@ var Protael = (function () {
         protaelproto.initClicks = function () {
             $("[data-x]").click(function () {
                 var element = $(this), xrefs = element.data("x");
-                if ( Object.keys(xrefs).length > 0) {
+                if (Object.keys(xrefs).length > 0) {
                     var html = "<table>";
                     for (var i in xrefs) {
                         html += "<tr><td>" + i + ':</td><td><a target="_blank" href="' + xrefs[i] + '">' + xrefs[i] + '</a</td></tr>';

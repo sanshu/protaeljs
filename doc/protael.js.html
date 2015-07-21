@@ -65,50 +65,114 @@
  * Extend SnapSVG Element
  * TODO: check next snapsvg release for native implementations!
  */
-Snap.plugin(function(Snap, Element, Paper, glob) {
+Snap.plugin(function (Snap, Element, Paper, glob) {
     "use strict";
     var e = Element.prototype;
-    e.toFront = function() {
+    e.toFront = function () {
         return this.appendTo(this.paper);
     };
-    e.toBack = function() {
+    e.toBack = function () {
         return this.prependTo(this.paper);
     };
-    e.hide = function() {
+    e.hide = function () {
+        /* need both to make sure graphics editors do not display this element */
         return this.attr({
-            'visibility': 'hidden'
+            'visibility': 'hidden',
+            'display': 'none'
         });
     };
-    e.show = function() {
+    e.show = function () {
         return this.attr({
-            'visibility': 'visible'
+            'visibility': 'visible',
+            'display': 'inline'
         });
+    };
+    /*\
+     * Element.dragVertical
+     [ method ]
+     **
+     * Modification of the original drag to allow only vertical drags
+     * Adds event handlers for an element's drag gesture
+     **
+     - onmove (function) handler for moving
+     - onstart (function) handler for drag start
+     - onend (function) handler for drag end
+     - mcontext (object) #optional context for moving handler
+     - scontext (object) #optional context for drag start handler
+     - econtext (object) #optional context for drag end handler
+     * Additionaly following `drag` events are triggered: `drag.start.&lt;id>` on start,
+     * `drag.end.&lt;id>` on end and `drag.move.&lt;id>` on every move. When element is dragged over another element
+     * `drag.over.&lt;id>` fires as well.
+     *
+     * Start event and start handler are called in specified context or in context of the element with following parameters:
+     o x (number) x position of the mouse
+     o y (number) y position of the mouse
+     o event (object) DOM event object
+     * Move event and move handler are called in specified context or in context of the element with following parameters:
+     o dx (number) shift by x from the start point
+     o dy (number) shift by y from the start point
+     o x (number) x position of the mouse
+     o y (number) y position of the mouse
+     o event (object) DOM event object
+     * End event and end handler are called in specified context or in context of the element with following parameters:
+     o event (object) DOM event object
+     = (object) @Element
+     \*/
+    e.dragVertical = function (onmove, onstart, onend, move_scope, start_scope, end_scope) {
+        if (!arguments.length) {
+            var origTransform;
+            return this.drag(function (dx, dy) {
+                this.attr({
+                    transform: origTransform + (origTransform ? "T" : "t") + [0, dy]
+                });
+            }, function () {
+                origTransform = this.transform().local;
+            });
+        }
+        function start(e, x, y) {
+            (e.originalEvent || e).preventDefault();
+            this._drag.x = x;
+            this._drag.y = y;
+            this._drag.id = e.identifier;
+            !drag.length && Snap.mousemove(dragMove).mouseup(dragUp);
+            drag.push({el: this, move_scope: move_scope, start_scope: start_scope, end_scope: end_scope});
+            onstart && eve.on("snap.drag.start." + this.id, onstart);
+            onmove && eve.on("snap.drag.move." + this.id, onmove);
+            onend && eve.on("snap.drag.end." + this.id, onend);
+            eve("snap.drag.start." + this.id, start_scope || move_scope || this, x, y, e);
+        }
+        this._drag = {};
+        draggable.push({el: this, start: start});
+        this.mousedown(start);
+        return this;
     };
 });
-
 /**
  * Protael object
  * @class
  */
-var Protael = (function() {
+var Protael = (function () {
     "use strict";
     /**
      * Current version
      * @type {string}
      */
     Protael.version = "0.1.0";
+    Protael.link = "http://proteins.burnham.org:8080/Protael/";
+    Protael.linkText = "ProtaelJS";
     var iniWidth, //initial requested width
         uiOptions = {
             mainSeqHeight: 55,
             featureHeight: 15, // height of the feature track
             graphHeight: 50,
+            graphSpacing: 20,
             space: 20
         },
     /**
      * Object to keep coloring schemas
      * @memberOf Protael
      */
-    ColoringSchemes = (function() {
+    ColoringSchemes = (function () {
         // see http://www.bioinformatics.nl/~berndb/aacolour.html
         var o = "orange",
             r = "red",
@@ -239,17 +303,20 @@ var Protael = (function() {
             };
         /**
          * Gets Coloring by name, or Clustal CS
-         * @param {type} colorscheme
+         * @param {type} schemaName
          * @returns {schema.clustal|_L32.schema.clustal|schema|_L32.schema}
          */
-        function getCSchema(colorscheme) {
-            colorscheme = colorscheme.toLowerCase();
-            return schema[colorscheme] || schema.clustal;
+        function getCSchema(schemaName) {
+            schemaName = schemaName.toLowerCase();
+            return schema[schemaName] || schema.clustal;
         }
 
-        return {getCSchema: getCSchema};
-    }());
+        function addCSchema(schemaName, schema) {
+            schema[schemaName] = schemas;
+        }
 
+        return {getCSchema: getCSchema, addCSchema: addCSchema};
+    }());
     /**
      * Create toolbar.
      * @private
@@ -267,7 +334,7 @@ var Protael = (function() {
                 min: .5,
                 max: 15,
                 step: .02,
-                slide: function(event, ui) {
+                slide: function (event, ui) {
                     r.setZoom(ui.value);
                 }
             }));
@@ -276,7 +343,7 @@ var Protael = (function() {
             icons: {
                 primary: "ui-icon ui-icon-arrow-4-diag"
             }
-        }).click(function() {
+        }).click(function () {
             r.zoomToFit();
         }));
         toolbar.a($('&lt;button>Zoom to selection&lt;/button>').button({
@@ -284,7 +351,7 @@ var Protael = (function() {
             icons: {
                 primary: "ui-icon ui-icon-arrowthick-2-e-w"
             }
-        }).click(function() {
+        }).click(function () {
             r.zoomToSelection();
         }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;Selection: &lt;input type="text" class="protael_selection_inp" readonly/>');
@@ -293,16 +360,15 @@ var Protael = (function() {
             icons: {
                 primary: "ui-icon-disk"
             }
-        }).click(function() {
+        }).click(function () {
             $("#xarea").text(r.getConstruct());
             $("#xdialog").dialog("open");
         }));
-
         $("#xdialog").dialog({
             modal: true,
             autoOpen: false,
             buttons: {
-                Ok: function() {
+                Ok: function () {
                     $(this).dialog("close");
                 }
             }
@@ -312,35 +378,31 @@ var Protael = (function() {
             icons: {
                 primary: "ui-icon-refresh"
             }
-        }).click(function() {
+        }).click(function () {
             r.clearSelection();
         }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;Coloring:');
         toolbar.a($(
             '&lt;select>&lt;option>Original&lt;/option>&lt;option>Clustal&lt;/option>&lt;option>Lesk&lt;/option>&lt;option>Cinema&lt;/option>&lt;option>MAEditor&lt;/option>&lt;option>ALI&lt;/option>&lt;option>None&lt;/option>&lt;/select>')
-            .change(function() {
+            .change(function () {
                 r.setColoringScheme($(this).val());
             }));
-
-
         if (!showControls)
             toolbar.hide();
-
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($(
             '&lt;input type="checkbox" id="chkTooltip" checked="true">&lt;label for="chkTooltip">Cursor tooltips&lt;/label>')
             .change(
-                function() {
+                function () {
                     r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
                 }));
-
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($('&lt;button>Export SVG&lt;/button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-image"
             }
-        }).click(function() {
+        }).click(function () {
             r.saveAsSVG();
         }));
         // toolbar.append('ScreenX: &lt;input type="text" id="sx_inp" readonly/>');
@@ -371,25 +433,20 @@ var Protael = (function() {
             + '&lt;desc>Protael ' + Protael.version + '&lt;/desc>'
             + '&lt;/svg>&lt;/div>',
             svg = $(svgString);
-
         $('#' + container).append(newDiv);
-
         this.container = container;
         newDiv.append(toolbar);
         newDiv.append(svg);
-
         this.protein = protein;
         iniWidth = svg.width();
-
         this.controlsEnabled = controls;
-
         if (this.controlsEnabled) {
             $('#' + this.container + ' .protael_slider').slider({
                 range: true,
                 min: 1,
                 max: protein.sequence.length,
                 values: [1, 1],
-                slide: function(event, ui) {
+                slide: function (event, ui) {
                     self.setSelection(ui.values[0], ui.values[1]);
                 }
             });
@@ -399,13 +456,23 @@ var Protael = (function() {
                 .append('&lt;div id="xdialog" title="Export selection">&lt;textarea id="xarea" cols="40" rows="10">&lt;/textarea>&lt;/div>');
             createToolbarBtns(this, toolbar, controls);
         }
-        this.selectedx = [-1, -1];// selection minX-maxX
+        newDiv
+            .append('&lt;div id="propsdialog" title="Properties">&lt;/div>');
+        $("#propsdialog").dialog({
+            modal: true,
+            autoOpen: false,
+            width: 'auto',
+            buttons: {
+                Ok: function () {
+                    $(this).dialog("close");
+                }
+            }
+        });
+        this.selectedx = [-1, -1]; // selection minX-maxX
 
         this.svgDiv = $('#' + container + ' .protael_svg');
-
         this.selectSlider = $('#' + container + ' .protael_slider');
         this.selectInput = $('#' + container + " .protael_selection_inp");
-
         // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
             .indexOf('Opera') >= 0);
@@ -417,9 +484,8 @@ var Protael = (function() {
         this.W = this.protein.sequence.length;
         this.paper.setSize(this.W, this.H);
         this.paper.axis(this.W, 10);
-
         newDiv.resizable({
-            stop: function(ev, ui) {
+            stop: function (ev, ui) {
                 self.zoomToFit();
             }
         });
@@ -447,8 +513,13 @@ var Protael = (function() {
         });
         var p = this.paper; //shortcut
 
+        this.pLink = p.text(0, 0, "Powered by Protael").attr({"id": "prref"});
+        this.pLink.click(function () {
+            window.open("http://proteins.burnham.org:8080/Protael/");
+        });
         this.viewSet = Snap.set(); // contains all objects for scaling
         this.textSet = Snap.set(); // contains all text elements of the canvas
+        this.textSet.push(this.pLink);
         this.overlayFtLabels = Snap.set(); // contains labels for overlay features (for
         // switching views on zoomin/out)
         this.createDefs();
@@ -461,7 +532,7 @@ var Protael = (function() {
         this.seqChars = p.g().attr({
             id: "seqChars",
             'font-family': 'monospace',
-            'font-size': "9px",
+            'font-size': "12px",
             "text-anchor": "start",
             "letter-spacing": '0px'
         });
@@ -487,7 +558,7 @@ var Protael = (function() {
      * @param {type} paperproto
      * @returns {undefined}
      */
-    (function(paperproto) {
+    (function (paperproto) {
         /**
          * Sets new paper size.
          * @memberOf Paper
@@ -495,8 +566,9 @@ var Protael = (function() {
          * @param {number} h new heigt
          * @returns {undefined}
          */
-        paperproto.setSize = function(w, h) {
+        paperproto.setSize = function (w, h) {
             var p = this.paper, vb = p.attr("viewBox"),
+                vbl = this.pLink.getBBox(),
                 hh = ''.concat(h).concat('px');
             vb.height = h;
             p.attr({
@@ -504,14 +576,17 @@ var Protael = (function() {
                 width: w,
                 viewBox: vb
             });
+            this.pLink.attr({
+                x: w - 1, // - vbl.width-5,
+                y: h //- vbl.height-5
+            });
             return this;
         };
-
         /**
          * Gets current paper width.
          * @returns {number}
          */
-        paperproto.getWidth = function() {
+        paperproto.getWidth = function () {
             return this.paper.attr("width");
         };
         /**
@@ -519,19 +594,17 @@ var Protael = (function() {
          * @param {number} zoom - requested zoom
          * @returns {undefined}
          */
-        paperproto.setZoom = function(zoom) {
+        paperproto.setZoom = function (zoom) {
             var p = this.protael,
                 ds = zoom / p.currScale,
                 w = this.getWidth();
-
             if (w.indexOf('px') > 0) {
                 w = w.replace(/[^\d.-]/g, '');
             }
 
             var newWidth = Math.round(w * ds);
             this.setWidth(newWidth);
-
-            this.viewSet.forEach(function(t) {
+            this.viewSet.forEach(function (t) {
                 var x = t.attr("x"), w = t.attr("width");
                 if (x) {
                     t.attr({x: x * ds});
@@ -553,7 +626,7 @@ var Protael = (function() {
                         width: w * ds
                     });
             });
-            this.textSet.forEach(function(t) {
+            this.textSet.forEach(function (t) {
                 var x = t.attr("x");
                 if (x) {
                     // just text
@@ -576,7 +649,7 @@ var Protael = (function() {
             // ///////////////////
             // works in Chrome only
             if (this.isChrome) {
-                var sseq = this.strechSeq
+                var sseq = this.strechSeq;
                 sseq.attr({
                     "letter-spacing": "0px"
                 }).hide();
@@ -600,21 +673,20 @@ var Protael = (function() {
             p.currScale = zoom;
             p.currScale > 1 ? this.seqBGSet.show() : this.seqBGSet.hide();
             p.currScale > 7 ? this.seqChars.show() : this.seqChars.hide();
-            p.currScale > 7 ? this.overlayFtLabels.forEach(function(t) {
+            p.currScale > 7 ? this.overlayFtLabels.forEach(function (t) {
                 t.hide();
-            }) : this.overlayFtLabels.forEach(function(t) {
+            }) : this.overlayFtLabels.forEach(function (t) {
                 t.show();
             });
             return this;
         };
-
         /**
          *
          * @param {number} w
          * @param {number} dx
          * @returns {_L399.paperproto.gAxes}
          */
-        paperproto.axis = function(w, dx) {
+        paperproto.axis = function (w, dx) {
             var i, maxI = w / dx + 1,
                 l, t,
                 H = this.protael.H,
@@ -640,7 +712,7 @@ var Protael = (function() {
             this.gAxes.add(axesLabels);
             return this.gAxes;
         };
-        paperproto.createDefs = function() {
+        paperproto.createDefs = function () {
             var p = this.paper,
                 dx = 5, dy = 8, y = 38,
                 thegap = p.g().attr({
@@ -649,23 +721,18 @@ var Protael = (function() {
             }),
                 s = "m 9.943742,1.54515 0,7.665216 C 9,15 8.977801,15 6,18 5.092011,19.329493 0.900884,20.578894 0,22 -0.903141,20.578894 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
             p.path(s).transform("scale(0.3)").attr({id: "glycan"}).toDefs();
-
             s = "m 9.943742,1.54515 0,7.665216 c 0.01858,0.678098 -1.8182777,4.537747 -2.31158,4.024493 L -1.548312,3.388971 -5,6.5 6.022199,18 C 5.11421,19.329493 2.03074,20.719454 1.129856,22.14056 0.226715,20.719454 -4.252632,19.379901 -5.160607,18.050408 -7.745849,14.487355 -9.7582132,11.922758 -9.6863207,9.212778 l 0,-7.667628 -5.7594933,0 0,7.665216 c 0.07412,5.544348 3.171965,8.901205 5.6876008,12.525256 2.6545072,3.598566 6.1354302,5.259308 6.0060532,7.136425 L -3.75216,38 4,38 4,28.866878 c -0.129374,-1.874375 3.351556,-3.535283 6.006045,-7.133892 2.518073,-3.62402 5.613376,-6.978272 5.687696,-12.52262 l 0,-7.665216 z";
             p.path(s).transform("scale(0.3)").attr({
                 id: "oliglycan"
             }).toDefs();
-
-
             s = "M 9.943742,1.54515 5.757162,5.359859 4,1.625 l -7,0 -2.311321,3.712778 -4.3749997,-3.792628 -5.7594933,0 5.6876008,8.190472 c 2.6545072,3.598566 6.1354302,1.259308 6.0060532,3.136425 L -3.75216,38 4,38 4,12.866878 C 4,11 7.351556,13.331595 10.006045,9.732986 L 15.693741,1.54515 z";
             p.path(s).transform("scale(0.3) ").attr({
                 id: "unknownglycan"
             }).toDefs();
-
             p.line(0, 0, 0, 12).attr({
                 id: "stick",
                 "stroke-width": 2
             }).toDefs();
-
             thegap.add(p.line(0, dy, 0, y - dy));
             thegap.add(p.line(-dx, 0, 0, dy));
             thegap.add(p.line(dx, 0, 0, dy));
@@ -673,24 +740,28 @@ var Protael = (function() {
             thegap.add(p.line(dx, y, 0, y - dy));
             thegap.toDefs();
         };
-
         /**
-         * Adds marker definition
+         * Adds marker definition.
          * @param {type} defpath path describing the marker
          * @param {type} label name of the marker
+         * @param {type} transform transformation string
          * @returns {undefined}
          */
-        paperproto.addDef = function(defpath, label) {
+        paperproto.addDef = function (defpath, label, transform) {
             if (this.paper.el("use").attr({"xlink:href": "#" + label}))
             {
                 console.log("Marker with the name '" + label + "' already exists!");
                 return;
             }
-            this.paper.path(defpath).attr({
+            var d = this.paper.path(defpath).attr({
                 id: label
-            }).toDefs();
-        };
+            });
+            if (transform) {
+                d.transform(transform);
+            }
 
+            d.toDefs();
+        };
         /**
          *
          * @param {string} defid Marker ID
@@ -699,7 +770,7 @@ var Protael = (function() {
          * @param {object} attrs
          * @returns {@this;@pro;paper@call;g}
          */
-        paperproto.createUse = function(defid, x, y, attrs) {
+        paperproto.createUse = function (defid, x, y, attrs) {
             var el = this.paper.el("use").attr({
                 x: x - 0.5,
                 y: y,
@@ -712,7 +783,7 @@ var Protael = (function() {
             this.viewSet.push(el);
             return g;
         };
-        paperproto.setWidth = function(width) {
+        paperproto.setWidth = function (width) {
             var ww, vb = this.paper.attr("viewBox");
             vb.width = width + 20;
             ww = ''.concat(width).concat('px');
@@ -724,14 +795,14 @@ var Protael = (function() {
                 this.protael.selectSlider.width(ww);
             }
         };
-        paperproto.proteinSeqBG = function(chars, scolors, yy, showSequence, offset, label) {
+        paperproto.proteinSeqBG = function (chars, scolors, yy, showSequence, offset, label) {
             offset = offset * 1 - 1 || 0;
             var inst = this.protael,
                 self = this,
                 paper = this.paper,
                 white = 'white';
             setTimeout(
-                function() {
+                function () {
                     //    var group = paper.select ("#seq_"+label);
                     var scale = inst.currentScale() || 1,
                         h = showSequence ? 9 : 3,
@@ -776,14 +847,12 @@ var Protael = (function() {
                     self.seqBGSet.add(allrects);
                 }, 10);
         };
-
-        paperproto.proteinSequence = function(chars, y, showSequence, alignment) {
+        paperproto.proteinSequence = function (chars, y, showSequence, alignment) {
             alignment = alignment || {};
             y = y || 10;
-
             var p = this.paper,
                 self = this,
-                label = alignment.description,
+                label = alignment.description || alignment.label || alignment.id,
                 sequenceGroup = p.g().attr({id: "SG_" + label, "title": label || ''}),
                 startX = alignment.start - 1 || 0,
                 inst = this.protael,
@@ -794,24 +863,24 @@ var Protael = (function() {
                 l = chars.length,
                 unstrW;
             sequenceGroup.add(rect, line);
-
+            alignment.data = alignment.data || {};
             if (alignment.clazz) {
                 rect.attr({"class": alignment.clazz});
             }
 
-            if (alignment.data) {
-                rect.attr(dataAttrToDataStar(alignment.data));
+            if (alignment.description) {
+                alignment.data['Description'] = alignment.description;
             }
 
+            propsToDataStars(alignment, rect);
             this.seqLineCovers.add(rect);
             this.seqLines.add(line);
             this.viewSet.push(line, rect);
-
             if (showSequence) {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
                 if (this.isChrome) {
                     this.strechSeq = this.paper.text(startX * inst.currentScale(), y + 8,
-                        chars.join(''));
+                        chars.join('')).hide();
                     unstrW = this.strechSeq.getBBox().width;
                     this.strechSeq.attr({
                         'uwidth': unstrW,
@@ -821,7 +890,7 @@ var Protael = (function() {
                     this.seqChars.add(this.strechSeq);
                 }
                 else {
-                    setTimeout(function() {
+                    setTimeout(function () {
                         if (showSequence) {
                             var allchars = [], c, x, chr;
                             for (c = 0; c &lt; l; c++) {
@@ -840,15 +909,13 @@ var Protael = (function() {
                 }
             }
         };
-
-        paperproto.clearColoring = function() {
+        paperproto.clearColoring = function () {
             //TODO: use forEach()
             for (var c in this.seqBGSet)
                 this.viewSet.exclude(this.seqBGSet[c]);
             this.seqBGSet.clear();
         };
-
-        paperproto.setColoringScheme = function(CS) {
+        paperproto.setColoringScheme = function (CS) {
             this.clearColoring();
             if (CS.toLowerCase() === 'none') {
                 return;
@@ -863,7 +930,6 @@ var Protael = (function() {
                 gutter = 35,
                 i, j, maxJ, c, maxC,
                 ali;
-
             if (CS.toLowerCase() === 'original') {
                 // restore original coloring
                 if (protein.seqcolors) {
@@ -876,7 +942,6 @@ var Protael = (function() {
                 }
 
                 this.proteinSeqBG(chars, scolors, gutter, true);
-
                 if (protein.alignments) {
                     for (j = 0, maxJ = protein.alignments.length; j &lt; maxJ; j++) {
                         ali = protein.alignments[j];
@@ -889,7 +954,7 @@ var Protael = (function() {
                             }
                         } else if (ali.seqcolors) {
                             data = Utils.splitData(ali.seqcolors.data.toUpperCase());
-                            if (ali.seqcolors.colors) {
+                            if (ali.seqcolors.colors && Array.isArray(ali.seqcolors.colors)) {
                                 // USE instance colors
 
                                 for (c = chars.length; c--; ) {
@@ -929,8 +994,10 @@ var Protael = (function() {
                     }
             }
         };
-
-        paperproto.featureTrack = function(ftrack, topY, height, allowOverlaps, showLabels, isOverlay) {
+        paperproto.addColoringScheme = function (name, schema) {
+            ColoringSchemes.addSChema(name, schema);
+        };
+        paperproto.featureTrack = function (ftrack, topY, height, allowOverlaps, showLabels, isOverlay) {
             //   console.log("Drawing ftrack: " + ftrack.label);
             var paper = this.paper,
                 clazz = 'pl-ftrack ' + (ftrack.clazz || ""),
@@ -947,29 +1014,25 @@ var Protael = (function() {
                 f,
                 dataatt,
                 maxF = ftrack.features.length;
-
             this.gFTracks.add(g);
             seenDeltas.push(0);
-
             if (allowOverlaps) {
                 for (f = 0; f &lt; maxF; f++) {
                     ft = ftrack.features[f];
                     if (ft) {
                         var featureGroup = this.feature(ft, ft.color || color, display,
-                            topY, height, g, showLabels, allowOverlaps, isOverlay);
+                            0, height, g, showLabels, allowOverlaps, isOverlay);
+                        /// TODO: what is this? no idea why I wrote this
                         if (ft.click) {
                             featureGroup.click(ft.click(ft.dbxrefs));
                         }
 
-                        if (ft.data) {
-                            dataatt = dataAttrToDataStar(ft.data);
-                            featureGroup.attr(dataatt);
-                        }
+                        propsToDataStars(ft, featureGroup);
                     }
                 }
             }
             else {
-                ftrack.features.sort(function(a, b) {
+                ftrack.features.sort(function (a, b) {
                     return a.start - b.start;
                 });
                 var arrcopy = JSON.parse(JSON.stringify(ftrack.features)),
@@ -986,14 +1049,11 @@ var Protael = (function() {
                             lastX = 0;
                         if (ft.start >= lastX) {
                             var featureGroup = this.feature(ft, ft.color || color,
-                                display, topY + delta, height, g, true, allowOverlaps, isOverlay);
+                                display, 0 + delta, height, g, true, allowOverlaps, isOverlay);
                             if (ft.click) {
                                 featureGroup.click(ft.click);
                             }
-                            if (ft.data) {
-                                dataatt = dataAttrToDataStar(ft.data);
-                                featureGroup.attr(dataatt);
-                            }
+                            propsToDataStars(ft, featureGroup);
                             lastX = ft.end;
                             lastLevel = ft.draw_level;
                         } else {
@@ -1006,7 +1066,7 @@ var Protael = (function() {
 
             if (ftrack.showLine) {
                 var d = (display === 'block') ? 0 : -height / 2 + 2,
-                    yy = 0 + topY + height / 2 - d;
+                    yy = height / 2 - d;
                 for (var delta in  seenDeltas) {
                     var dd = seenDeltas[delta],
                         line = paper.line(0, yy + dd, this.protael.W, yy + dd).attr({
@@ -1019,10 +1079,15 @@ var Protael = (function() {
                     this.viewSet.push(line);
                 }
             }
-
+            if (!isOverlay) {
+                var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
+                g.append(label);
+            }
+            g.transform("translate(0, " + topY + ")");
+            g.dragVertical();
             return lastLevel;
         };
-        paperproto.feature = function(feature, color, display, topY, height, g, showLabel, allowOverlaps, isOverlay) {
+        paperproto.feature = function (feature, color, display, topY, height, g, showLabel, allowOverlaps, isOverlay) {
             var s = feature.start - 1,
                 e = feature.end,
                 shapeGr,
@@ -1032,9 +1097,7 @@ var Protael = (function() {
                 paper = this.paper;
             //      console.log("\tDrawing feature: " + feature.label);
             if (display === 'block') {
-                shape = paper.rect(s, topY, e - s, height).attr({
-                    // stroke: "#bbb"
-                });
+                shape = paper.rect(s, topY, e - s, height);
             } else if (display === 'line') {
                 shape = paper.rect(s, topY + height / 2 + 4, e - s, 3);
             }
@@ -1055,10 +1118,9 @@ var Protael = (function() {
                 fill: color,
                 'class': clazz
             });
-
             shapeGr.add(shape);
             if (showLabel) {
-                label = paper.text((s + e) / 2, topY + height - 5,
+                label = paper.text((0.5 * s + 0.5 * e), topY + height - 5,
                     feature.label);
                 label.attr({stroke: 'none', 'class': 'pl-feature-label'});
                 shapeGr.append(label);
@@ -1071,7 +1133,6 @@ var Protael = (function() {
             this.viewSet.push(shape);
             return shapeGr;
         };
-
         /**
          * Creates formated path string for SVG cubic path element
          * @param {type} x1
@@ -1084,10 +1145,9 @@ var Protael = (function() {
          * @param {type} y2
          * @returns {String}
          */
-        paperproto.path = function(x1, y1, px1, py1, px2, py2, x2, y2) {
+        paperproto.path = function (x1, y1, px1, py1, px2, py2, x2, y2) {
             return "L" + x1 + " " + y1 + " C" + px1 + " " + py1 + " " + px2 + " " + py2 + " " + x2 + " " + y2;
         };
-
         /* computes control points given knots K, this is the brain of the operation
          * From: http://www.particleincell.com/blog/2012/bezier-splines/
          * */
@@ -1101,13 +1161,11 @@ var Protael = (function() {
                 b = new Array(),
                 c = new Array(),
                 r = new Array();
-
             /*left most segment*/
             a[0] = 0;
             b[0] = 2;
             c[0] = 1;
             r[0] = K[0] + 2 * K[1];
-
             /*internal segments*/
             for (i = 1; i &lt; n - 1; i++) {
                 a[i] = 1;
@@ -1121,7 +1179,6 @@ var Protael = (function() {
             b[n - 1] = 7;
             c[n - 1] = 0;
             r[n - 1] = 8 * K[n - 1] + K[n];
-
             /*solves Ax=b with the Thomas algorithm (from Wikipedia)*/
             for (i = 1; i &lt; n; i++) {
                 m = a[i] / b[i - 1];
@@ -1139,13 +1196,13 @@ var Protael = (function() {
                 p2[i] = 2 * K[i + 1] - p1[i + 1];
             }
             p2[n - 1] = 0.5 * (K[n] + p1[n - 1]);
-
             return {p1: p1, p2: p2};
         }
 
-        paperproto.quantTrack = function(qtrack, topY, width, height) {
+        paperproto.quantTrack = function (qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var vv = qtrack.values,
+            var vv = Array.isArray(qtrack.values) ?
+                qtrack.values : Utils.splitData(qtrack.values),
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
@@ -1154,19 +1211,16 @@ var Protael = (function() {
                 zero = (-min) / (max - min) * 100,
                 path = '',
                 ky = height / (max - min),
-                y = topY,
-                // different achart types
+                // different chart types
                 spline = "spline",
                 column = "column",
                 area = "area",
                 areaspline = "area-spline",
                 line = "line",
                 type = qtrack.type || areaspline,
-                //
                 X, Y, W = this.protael.W,
                 paper = this.paper,
                 chart2;
-
             // pad values aray with 0
             for (i = vv.length; i &lt;= width; i++) {
                 vv[i] = 0;
@@ -1176,46 +1230,52 @@ var Protael = (function() {
                 if (c.length === 1) {
                     fill = c[0];
                 } else if (c.length === 2) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
+                    if (c[1] !== '') {
+                        fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
+                    }
                 }
                 else if (c.length === 3) {
-                    fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
+                    if (c[1] === '') {
+                        fill = c[0];
+                    } else if (c[2] === '') {
+                        fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
+                    } else {
+                        fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ":" + zero + '-' + c[2] + ':90');
+                    }
                 }
             }
 
             if (type === area || type === line || type === areaspline || type === spline) {
-                path = "M0 " + (topY + height + min * ky);
+                path = "M0 " + (height + min * ky);
                 if (type === area || type === line) {
                     // no smoothing required, just connect the dots
                     for (j = 0; j &lt; W; j++) {
                         X = j;
-                        Y = y + height - (vv[j] - min) * ky;
+                        Y = height - (vv[j] - min) * ky;
                         if (j !== jj - 1) {
                             path = path + "L" + X + ", " + Y;
                         }
                     }
-                    path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
+                    path = path + 'L' + (W) + ' ' + (height + min * ky) + " Z";
                 } else if (type === areaspline || type === spline) {
                     /*grab (x,y) coordinates of the control points*/
                     var xx = new Array(),
                         yy = new Array(), px, py;
-
                     for (i = 0; i &lt; W; i++) {
                         /*use parseInt to convert string to int*/
                         xx[i] = i;
-                        yy[i] = y + height - (vv[i] - min) * ky;
+                        yy[i] = height - (vv[i] - min) * ky;
                     }
 
                     /*computes control points p1 and p2 for x and y direction*/
                     px = computeControlPoints(xx);
                     py = computeControlPoints(yy);
-
                     /*updates path settings, the browser will draw the new spline*/
                     for (i = 0; i &lt; W; i++) {
                         path +=
                             this.path(xx[i], yy[i], px.p1[i], py.p1[i], px.p2[i], py.p2[i], xx[i + 1], yy[i + 1]);
                     }
-                    path = path + 'L' + (W) + ' ' + (topY + height + min * ky) + " Z";
+                    path = path + 'L' + (W) + ' ' + (height + min * ky) + " Z";
                 }
 
                 chart2 = paper.path(path).attr({
@@ -1223,7 +1283,6 @@ var Protael = (function() {
                     fill: fill,
                     "class": "pl-chart-area"
                 });
-
                 if (type === line || type === spline) {
                     // fill with transparent paint
                     chart2.attr({
@@ -1238,14 +1297,12 @@ var Protael = (function() {
                     "class": "pl-chart-area",
                     opacity: 1.0
                 });
-                var y0 = y + height + min * ky;
-
+                var y0 = height + min * ky;
                 for (j = 0; j &lt; W; j++) {
                     X = j;
                     var dh = 0;
-
                     if (vv[j] >= 0) {
-                        Y = topY + (max - vv[j]) * ky;
+                        Y = (max - vv[j]) * ky;
                         dh = vv[j] * ky;
                     } else {
                         Y = y0;
@@ -1256,7 +1313,7 @@ var Protael = (function() {
                     this.viewSet.push(r);
                     rects.add(r);
                 }
-                chart2 = paper.rect(0, topY, W, height).attr({
+                chart2 = paper.rect(0, 0, W, height).attr({
                     stroke: fill,
                     fill: fill,
                     mask: rects
@@ -1265,26 +1322,23 @@ var Protael = (function() {
                 console.log("Unknown chart type :" + type);
             }
 
-            var label = paper.text(.1, topY + 8, qtrack.label).attr({"class": "pl-chart-label"}),
-                topLine = paper.line(0, topY, W, topY).attr({"class": "pl-chart-top"}),
-                cLine = paper.line(0, topY + max * ky, W, topY + max * ky).attr({"class": "pl-chart-center"}),
-                bottomLine = paper.line(0, topY + height, W, topY + height).attr({"class": "pl-chart-bottom"}),
-                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label});
-
-            if (qtrack.data) {
-                g.attr(dataAttrToDataStar(qtrack.data));
-            }
+            var label = paper.text(.1, 8, qtrack.label).attr({"class": "pl-chart-label"}),
+                topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
+                cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
+                bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
+                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
+            propsToDataStars(qtrack, g);
+            /**** Try out for draggable elements*/
+            g.dragVertical();
             this.gQTracks.add(g);
-
             this.viewSet.push(topLine);
             this.viewSet.push(bottomLine);
             this.viewSet.push(cLine);
             this.viewSet.push(chart2);
             this.textSet.push(label);
+            return g;
         };
-
-
-        paperproto.proteinMarkers = function(markers, topY) {
+        paperproto.proteinMarkers = function (markers, topY) {
             var markerGp = this.paper.g().attr({
                 id: "gMarkers"
             }),
@@ -1302,16 +1356,17 @@ var Protael = (function() {
                 }, r, g;
             for (i = markers.length; i--; ) {
                 m = markers[i];
+                if (!m.x || m.x === "") {
+                    continue;
+                }
                 shift = (m.position === 'bottom') ? 26 : 0;
                 type = m.type ? m.type : "glycan";
-
                 //TODO: add IDs
                 id = m.label ? "m_" + m.label : "m_" + i;
                 mark = this.createUse(type, m.x, topY + shift, {
                     id: id,
                     title: m.label ? m.label : type
                 });
-
                 if (m.label) {
                     shift = (m.position === 'bottom') ? 45 : 0;
                     t = this.paper.text(m.x, topY + shift, m.label).attr(att);
@@ -1327,17 +1382,11 @@ var Protael = (function() {
                         fill: m.color,
                         stroke: m.color
                     });
-
-                if (m.data) {
-                    mark.attr(dataAttrToDataStar(m.data));
-
-                }
-
+                propsToDataStars(m, mark);
                 markerGp.add(mark);
             }
         };
-
-        paperproto.proteinBridges = function(bridges, topY) {
+        paperproto.proteinBridges = function (bridges, topY) {
             var group = this.paper.g().attr({
                 id: "gBridges",
                 class: "pl-bridge"
@@ -1354,10 +1403,7 @@ var Protael = (function() {
                 gb = paper.g().attr({
                     id: "bridge_" + i
                 });
-
-                if (b.data) {
-                    gb.attr(dataAttrToDataStar(b.data));
-                }
+                propsToDataStars(b, gb);
                 att = {};
                 if (b.color) {
                     att = {
@@ -1418,18 +1464,15 @@ var Protael = (function() {
                 group.add(gb);
             }
         };
-
-        paperproto.draw = function(protein) {
+        paperproto.draw = function (protein) {
             var scolors = [],
                 chars = protein.sequence.toUpperCase().split(''),
-                // showAlignments = protein.alidisplay ? true : false, // show MAS letters?
                 topY = 35,
                 drawingTop = 20,
                 paper = this.paper,
                 i, counterMax,
                 allowOver, delta,
                 qtrackLbls = [], qtrackBgs = [];
-
             if (protein.markers) {
                 this.proteinMarkers(protein.markers, drawingTop);
             }
@@ -1441,7 +1484,7 @@ var Protael = (function() {
             if (protein.overlayfeatures) {
                 var showOLbls = protein.overlayfeatures.showLabels || false;
                 this.featureTrack(protein.overlayfeatures, topY - 5, 20, true,
-                    showOLbls);
+                    showOLbls, true);
             }
             this.aliTop = topY;
             /*
@@ -1489,24 +1532,27 @@ var Protael = (function() {
             }
 
             counterMax = protein.qtracks ? protein.qtracks.length : 0;
-
             for (i = 0; i &lt; counterMax; i++) {
-                this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
-                // add tooltip
-                var r = paper.rect(0, 16 + topY, 22, 20, 4, 4).attr({
-                    fill: "#000",
-                    stroke: "black",
-                    color: "white",
-                    "stroke-width": "2px",
-                    opacity: ".7"
-                }), l = paper.text(0, 30 + topY, '').attr({
-                    fill: "white"
-                });
-                this.gLabels.add(r, l);
-                qtrackLbls[i] = l;
-                qtrackBgs[i] = r;
-                protein.qtracks[i].topY = topY;
-                topY += uiOptions.graphHeight + uiOptions.space;
+                if (protein.qtracks[i].values && protein.qtracks[i].values.length) {
+                    this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
+                    // add tooltip
+                    var r = paper.rect(0, 16 + topY, 22, 20, 4, 4).attr({
+                        fill: "#000",
+                        stroke: "black",
+                        color: "white",
+                        "stroke-width": "2px",
+                        opacity: ".7"
+                    }), l = paper.text(0, 30 + topY, '').attr({
+                        fill: "white"
+                    });
+                    this.gLabels.add(r, l);
+                    qtrackLbls[i] = l;
+                    qtrackBgs[i] = r;
+                    protein.qtracks[i].topY = topY;
+                    topY += uiOptions.graphHeight + uiOptions.space;
+                } else {
+                    console.log("No values found for QTRACK [" + i + "]. Skipping.");
+                }
             }
 
             this.aliTop = topY;
@@ -1518,7 +1564,6 @@ var Protael = (function() {
                 for (i = 0; i &lt; counterMax; i++) {
                     var ali = protein.alignments[i],
                         schars = ali.sequence.split('');
-
                     this.proteinSequence(schars, topY, show, ali);
                     topY += 10;
                     if (show) {
@@ -1542,12 +1587,12 @@ var Protael = (function() {
                 opacity: .5,
                 id: "selector"
             }).hide();
-
             // rect to show selection
 
-            this.pointer = paper.rect(0, 0, 2, this.protael.H).attr({
+            this.pointer = paper.rect(0, 0, 1, this.protael.H).attr({
                 fill: 'green',
                 stroke: 'green',
+                "stroke-width": "1px",
                 opacity: .7,
                 id: "pointer"
             });
@@ -1571,10 +1616,10 @@ var Protael = (function() {
                 id: "blanket"
             });
             this.gLabels.add(residueBg, residueLabel);
-            paper.mousemove(function(e) {
+            paper.mousemove(function (e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
-                    c = this.container + ' #blanket',
+                    c = "#" + parent.container + ' #blanket',
                     delta = 5, x;
                 if (xoff === undefined) { // Firefox fix
                     var q = $(c);
@@ -1597,52 +1642,51 @@ var Protael = (function() {
                         width: l
                     });
                     for (var q in protein.qtracks) {
-                        var lb = qtrackLbls[q];
-                        var r = qtrackBgs[q];
-                        lb.node.textContent = protein.qtracks[q].values[OX];
-                        var l = lb.getBBox().width;
-                        r.attr({
-                            width: l
-                        });
+                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
+                            var lb = qtrackLbls[q],
+                                r = qtrackBgs[q];
+                            lb.node.textContent = protein.qtracks[q].values[OX];
+                            var l = lb.getBBox().width;
+                            r.attr({
+                                width: l
+                            });
+                        }
                     }
                 }
-            }).mouseout(function() {
+            }).mouseout(function () {
                 self.gLabels.hide();
                 self.pointer.hide();
             });
             this.viewSet.push(r);
+//            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
+//            .transform("translate(0, 10)");
         };
-
         /**
          * Returns content of the paper as SVG string
          * @returns {string} SVG string representing current paper content
          */
-        paperproto.toSVGString = function() {
+        paperproto.toSVGString = function () {
             return this.paper.toString();
         };
-
         /**
-         * Convert data attributes of JSON object to data-* HTML5 attributes.
-         * @param {type} data
-         * @returns {unresolved}
+         * Create data-* attributes from object properties
+         * @param {type} piece object
+         * @param {type} target svg elementy to add attibutes
          */
-        function dataAttrToDataStar(data) {
-            var key, newkey, val, res = {};
-//
-//            for (key in data) {
-//                if (data.hasOwnProperty(key)) {
-//                    val = data[key];
-//                    newkey = "data-" + key.toLowerCase().replace(/[^a-z0-9]/gmi, "-").replace(/\s+/g, "-");
-//                    res[newkey] = val;
-//                }
-//            }
-            res['data-d'] = JSON.stringify(data);
-            return res;
+        function propsToDataStars(piece, target) {
+            var res = {};
+            if (piece.properties && Object.keys(piece.properties).length) {
+                res['data-d'] = JSON.stringify(piece.properties);
+            }
+            if (piece.dbxrefs && Object.keys(piece.dbxrefs).length) {
+                res['data-x'] = JSON.stringify(piece.dbxrefs);
+            }
+            target.attr(res);
         }
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
-    Protael.prototype.Utils.calcHeight = function(protein) {
+    Protael.prototype.Utils.calcHeight = function (protein) {
         var h = uiOptions.mainSeqHeight, // main sequence
             y = 0;
         if (protein.ftracks && protein.ftracks.length) {
@@ -1663,7 +1707,7 @@ var Protael = (function() {
      * @param {type} data
      * @returns {array} values
      */
-    Protael.prototype.Utils.splitData = function(data) {
+    Protael.prototype.Utils.splitData = function (data) {
         return (data.indexOf(',') > 0) ? data.split(',') : data.split('');
     };
     /**
@@ -1672,18 +1716,17 @@ var Protael = (function() {
      * @param {type} schema
      * @returns {Array}
      */
-    Protael.prototype.Utils.getColors = function(chars, schema) {
+    Protael.prototype.Utils.getColors = function (chars, schema) {
         var scolors = [], l = chars.length, c;
         for (c = 0; c &lt; l; c++) {
             scolors[c] = schema[chars[c]] || 'white';
         }
         return scolors;
     };
-
     var Utils = Protael.prototype.Utils; // shortcut
 
-    (function(protaelproto) {
-        protaelproto.draw = function() {
+    (function (protaelproto) {
+        protaelproto.draw = function () {
             this.paper.draw(this.protein);
             if (!this.CS) {
                 this.setColoringScheme("Original");
@@ -1692,10 +1735,10 @@ var Protael = (function() {
             this.setZoom(iniWidth / this.W);
             this.clearSelection();
             this.initTooltips();
+            this.initClicks();
             return this;
         };
-
-        protaelproto.setSelection = function(minx, maxx) {
+        protaelproto.setSelection = function (minx, maxx) {
             this.selectedx[0] = minx;
             this.selectedx[1] = maxx;
             var wd = this.toScreenX(maxx) - this.toScreenX(minx - 1);
@@ -1709,7 +1752,7 @@ var Protael = (function() {
             }
             return this;
         };
-        protaelproto.clearSelection = function(x) {
+        protaelproto.clearSelection = function (x) {
             this.selectedx = [-1, -1];
             this.paper.selector.attr({
                 'x': 0,
@@ -1731,24 +1774,24 @@ var Protael = (function() {
             }
             return this;
         };
-        protaelproto.translate = function(dx) {
+        protaelproto.translate = function (dx) {
             this.svgDiv.scrollLeft(this.svgDiv.scrollLeft() + dx);
             return this;
         };
-        protaelproto.zoomIn = function() {
+        protaelproto.zoomIn = function () {
             this.setZoom(this.currScale + 0.1);
             return this;
         };
-        protaelproto.zoomOut = function() {
+        protaelproto.zoomOut = function () {
             this.setZoom(this.currScale - 0.1);
             return this;
         };
-        protaelproto.zoomToFit = function() {
+        protaelproto.zoomToFit = function () {
             var w = this.svgDiv.width();
             this.setZoom(w / this.W);
             return this;
         };
-        protaelproto.zoomToSelection = function() {
+        protaelproto.zoomToSelection = function () {
             if (this.selectedx[1] === -1)
                 return;
             var w = this.selectedx[1] - this.selectedx[0];
@@ -1757,14 +1800,14 @@ var Protael = (function() {
             this.svgDiv.scrollLeft(s);
             return this;
         };
-        protaelproto.setPaperWidth = function(width) {
+        protaelproto.setPaperWidth = function (width) {
             this.paper.setWidth(width);
             return this;
         };
-        protaelproto.currentScale = function() {
+        protaelproto.currentScale = function () {
             return this.currScale;
         };
-        protaelproto.getConstruct = function() {
+        protaelproto.getConstruct = function () {
             if (this.selectedx[0] === -1)
                 return 'No selection';
             var l = this.protein.label || 'construct';
@@ -1773,61 +1816,114 @@ var Protael = (function() {
                 + this.protein.sequence.substring(this.selectedx[0] - 1,
                     this.selectedx[1]);
         };
-        protaelproto.toOriginalX = function(x) {
+        protaelproto.toOriginalX = function (x) {
             return Math.round((x + this.currShift) / this.currScale);
         };
-        protaelproto.toScreenX = function(x) {
+        protaelproto.toScreenX = function (x) {
             return Math.round(x * this.currScale - this.currShift);
         };
-        protaelproto.setShowCursorTooltips = function(val) {
+        protaelproto.setShowCursorTooltips = function (val) {
             if (!val)
                 this.paper.gLabels.hide();
             this.showCursorTooltips = val;
             return this;
         };
-
-        protaelproto.setZoom = function(zoom) {
+        protaelproto.setZoom = function (zoom) {
             zoom = Math.min(zoom, 15);
             zoom = Math.max(zoom, 0.5);
             this.paper.setZoom(zoom);
             $("#" + this.container + ' .protael_zoomslider').slider("value", this.currScale);
             return this;
         };
-        protaelproto.setColoringScheme = function(CS) {
+        /**
+         * Change current coloring schema
+         * @param {type} CS
+         * @returns {protael_L1722.protaelproto}
+         */
+        protaelproto.setColoringScheme = function (CS) {
             this.paper.setColoringScheme(CS);
             this.CS = CS;
             return this;
         };
-
-        protaelproto.select = function(query) {
+        /**
+         * Wrapper ro Snap.slectAll to make it look more jquery-like
+         * @param {type} query
+         */
+        protaelproto.select = function (query) {
             return Snap.selectAll(query);
         };
-
-
-        protaelproto.toSVGString = function() {
+        /**
+         * Get current vew as SVG string.
+         * @returns SVG string
+         */
+        protaelproto.toSVGString = function () {
             return this.paper.toSVGString();
         };
-
-        protaelproto.saveAsSVG = function() {
-            //TODO: have to separate styleg for graph elements and ui elements
+        protaelproto.saveAsSVG = function () {
+            //TODO: have to separate style for graph elements and ui elements
             // and use only graph styles for export
             var prefix = '&lt;?xml version="1.0" standalone="yes"?>\n' +
                 '&lt;?xml-stylesheet href="http://proteins.burnham.org:8080/Protael/css/protael.css" type="text/css"?>\n' +
                 '&lt;svg xmlns:xlink="http://www.w3.org/1999/xlink" ',
-                svg = prefix + ' ' + this.toSVGString().substring(4),
+                subsvg = this.toSVGString(),
+                div = document.getElementById(this.container),
+                style = "&lt;style type='text/css'>&lt;![CDATA[\n" + styles(div) + "\n]]>&lt;/style>",
+                svg = prefix + ' ' + subsvg.substring(4, subsvg.length - 6) + style + '&lt;/svg>',
                 blob = new Blob([svg], {type: "image/svg+xml"});
+            console.log(style);
             // from FileSaver.js
             saveAs(blob, "protael_export.svg");
         };
+// save all page styles as inline styles
+// see http://spin.atomicobject.com/2014/01/21/convert-svg-to-png/
+        function isExternal(url) {
+            return url && url.lastIndexOf('http', 0) == 0 && url.lastIndexOf(window.location.host) == -1;
+        }
+        ;
+        function styles(el) {
+            var css = "";
+            var sheets = document.styleSheets;
+            for (var i = 0; i &lt; sheets.length; i++) {
+                if (isExternal(sheets[i].href)) {
+                    console.warn("Cannot include styles from other hosts: " + sheets[i].href);
+                    continue;
+                }
+                var rules = sheets[i].cssRules;
+                if (rules != null) {
+                    for (var j = 0; j &lt; rules.length; j++) {
+                        var rule = rules[j];
+                        if (typeof (rule.style) != "undefined") {
+                            var match = null;
+                            try {
+                                match = el.querySelector(rule.selectorText);
+                            } catch (err) {
+                                console.warn('Invalid CSS selector "' + rule.selectorText + '"', err);
+                            }
+                            if (match) {
+                                var selector = rule.selectorText;
+                                css += selector + " { " + rule.style.cssText + " }\n";
+                            } else if (rule.cssText.match(/^@font-face/)) {
+                                css += rule.cssText + '\n';
+                            }
+                        }
+                    }
+                }
+            }
+            return css;
+        }
+        ;
+        protaelproto.addDefinition = function (defpath, label, transform) {
+            this.paper.addDef(defpath, label, transform);
+        };
 
-        protaelproto.initTooltips = function() {
-            $(document).tooltip({
-                track: true,
-                content: function() {
+        protaelproto.tooltip = function (callback) {
+            if (callback && typeof (callback) == "function") {
+                this.tooltipCallback = callback;
+            } else {
+                this.tooltipCallback = function () {
                     var element = $(this);
                     if (element.is("[data-d]")) {
                         var data = element.data("d"), res = '&lt;table>';
-
                         for (var i in data) {
                             if (i === 'pdbid') {
                                 res += '&lt;tr>&lt;td colspan="2">&lt;img src="http://www.rcsb.org/pdb/images/' + data[i] + '_bio_r_250.jpg">&lt;/td>&lt;/tr>';
@@ -1835,18 +1931,44 @@ var Protael = (function() {
                                 res += "&lt;tr>&lt;td>" + i + ':&lt;/td>&lt;td>' + data[i] + '&lt;/td>&lt;/tr>';
                             }
                         }
-                        res += "&lt;/table>"
+                        res += "&lt;/table>";
                         return res;
                     } else if (element.is("[title]")) {
                         return element.attr("title");
                     } else if (element.is("img")) {
                         return element.attr("alt");
                     }
+                };
+            }
+            return this;
+        };
+
+        protaelproto.initTooltips = function () {
+            if (! this.tooltipCallback)
+                this.tooltip(null);
+            $(document).tooltip({
+                track: true,
+                content: this.tooltipCallback
+            });
+        };
+
+
+        protaelproto.initClicks = function () {
+            $("[data-x]").click(function () {
+                var element = $(this), xrefs = element.data("x");
+                if (Object.keys(xrefs).length > 0) {
+                    var html = "&lt;table>";
+                    for (var i in xrefs) {
+                        html += "&lt;tr>&lt;td>" + i + ':&lt;/td>&lt;td>&lt;a target="_blank" href="' + xrefs[i] + '">' + xrefs[i] + '&lt;/a&lt;/td>&lt;/tr>';
+                    }
+                    html += "&lt;/table>";
+                    $("#propsdialog").html(html);
+                    $("#propsdialog").dialog("open");
                 }
+
             });
         };
     }(Protael.prototype));
-
     window.Protael = Protael;
     return Protael;
 }()); // end of protael definition
@@ -1878,7 +2000,7 @@ function ProtaelBrowser(protein, container, width, height, controls) {
 					
 		<span class="jsdoc-message">
 		Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.2.2</a>
-		on Wed Aug 13th 2014 using the <a
+		on Thu Jul 16th 2015 using the <a
 			href="https://github.com/terryweiss/docstrap">DocStrap template</a>.
 		</span>
 				</footer>
