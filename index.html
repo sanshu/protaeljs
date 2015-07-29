@@ -15,6 +15,7 @@
         <script type="text/javascript" src="http://code.jquery.com/ui/1.11.0/jquery-ui.min.js"></script>
         <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.3.0/snap.svg-min.js"></script>
         <link rel="stylesheet" href="css/protael.css"/>
+        <!--<script type="text/javascript" src="lib/snap.svg-min.js"></script>-->
         <script type="text/javascript" src="src/protael.js"></script>
         <script>
             $(document)
@@ -30,6 +31,11 @@
                         applyJSON();
 //                    }
                     });
+                    
+                 $('#savePNG').click(function(){
+                     saveSvgAsPng(document.getElementById("protaelHolder_svgcanvas"), "protael_export.png");
+                     
+                 });   
                 });
             function applyJSON() {
                 $(".protael_resizable").remove();
@@ -91,6 +97,8 @@
                 <div class="col-md-12">
                     <h3>Protael view</h3>
                     <div id ="protaelHolder"  style="width:100%"> </div>
+                    
+                    <button id="savePNG">savePNG</button>
                 </div>
             </div>
         </div>
@@ -112,4 +120,6 @@
             ga('send', 'pageview');
         </script>
         <script type="text/javascript" async="" src="lib/FileSaver_Blob.js"></script>
+        <script type="text/javascript" async="" src="lib/saveSvgAsPng.js"></script>
+        
     </body></html>
