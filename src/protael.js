@@ -604,11 +604,9 @@ var Protael = (function () {
                 });
             }
             // //////////////////
-            // var sx = seqBGSet.transform().localMatrix.split().scalex * ds;
-            // seqBGSet.transform("S" + zoom + " 1 0 0");
 
             p.currScale = zoom;
-            p.currScale > 1 ? this.seqBGSet.show() : this.seqBGSet.hide();
+            // p.currScale > 1 ? this.seqBGSet.show() : this.seqBGSet.hide();
             p.currScale > 7 ? this.seqChars.show() : this.seqChars.hide();
             p.currScale > 7 ? this.overlayFtLabels.forEach(function (t) {
                 t.hide();
@@ -1511,7 +1509,6 @@ var Protael = (function () {
 
             this.gSequences.add(this.seqLabelsSet, this.seqBGSet, this.seqChars, this.seqLines);
             this.labelsWidth = this.seqLabelsSet.getBBox().width;
-            this.seqBGSet.hide();
             this.seqChars.hide().transform("T1, 0");
             this.gSequences.toFront();
             this.seqLines.toBack();
@@ -1881,7 +1878,7 @@ var Protael = (function () {
         };
 
         protaelproto.initTooltips = function () {
-            if (! this.tooltipCallback)
+            if (!this.tooltipCallback)
                 this.tooltip(null);
             $(document).tooltip({
                 track: true,
