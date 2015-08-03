@@ -1579,11 +1579,13 @@ var Protael = (function () {
                         if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
                             var lb = qtrackLbls[q],
                                 r = qtrackBgs[q];
-                            lb.node.textContent = protein.qtracks[q].values[OX];
-                            var l = lb.getBBox().width;
-                            r.attr({
-                                width: l
-                            });
+                            if (typeof lb != 'undefined') {
+                                lb.node.textContent = protein.qtracks[q].values[OX];
+                                var l = lb.getBBox().width;
+                                r.attr({
+                                    width: l
+                                });
+                            }
                         }
                     }
                 }
