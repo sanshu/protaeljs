@@ -326,13 +326,13 @@ var Protael = (function () {
             }));
         if (!showControls)
             toolbar.hide();
-        toolbar.a('&nbsp;&VerticalLine;&nbsp;');
-        toolbar.a($(
-            '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
-            .change(
-                function () {
-                    r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
-                }));
+//        toolbar.a('&nbsp;&VerticalLine;&nbsp;');
+//        toolbar.a($(
+//            '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
+//            .change(
+//                function () {
+//                    r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
+//                }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($('<button>Export SVG</button>').button({
             text: false,
@@ -1566,29 +1566,29 @@ var Protael = (function () {
                 self.pointer.attr({
                     'x': x + delta
                 }).show();
-                if (parent.showCursorTooltips) {
-                    var OX = parent.toOriginalX(x);
-                    residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
-                    x += delta;
-                    self.gLabels.transform("T " + x + " 0").show();
-                    var l = residueLabel.getBBox().width;
-                    residueBg.attr({
-                        width: l
-                    });
-                    for (var q in protein.qtracks) {
-                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
-                            var lb = qtrackLbls[q],
-                                r = qtrackBgs[q];
-                            if (typeof lb != 'undefined') {
-                                lb.node.textContent = protein.qtracks[q].values[OX];
-                                var l = lb.getBBox().width;
-                                r.attr({
-                                    width: l
-                                });
-                            }
-                        }
-                    }
-                }
+//                if (parent.showCursorTooltips) {
+//                    var OX = parent.toOriginalX(x);
+//                    residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
+//                    x += delta;
+//                    self.gLabels.transform("T " + x + " 0").show();
+//                    var l = residueLabel.getBBox().width;
+//                    residueBg.attr({
+//                        width: l
+//                    });
+//                    for (var q in protein.qtracks) {
+//                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
+//                            var lb = qtrackLbls[q],
+//                                r = qtrackBgs[q];
+//                            if (typeof lb != 'undefined') {
+//                                lb.node.textContent = protein.qtracks[q].values[OX];
+//                                var l = lb.getBBox().width;
+//                                r.attr({
+//                                    width: l
+//                                });
+//                            }
+//                        }
+//                    }
+//                }
             }).mouseout(function () {
                 self.gLabels.hide();
                 self.pointer.hide();
@@ -1758,12 +1758,12 @@ var Protael = (function () {
         protaelproto.toScreenX = function (x) {
             return Math.round(x * this.currScale - this.currShift);
         };
-        protaelproto.setShowCursorTooltips = function (val) {
-            if (!val)
-                this.paper.gLabels.hide();
-            this.showCursorTooltips = val;
-            return this;
-        };
+//        protaelproto.setShowCursorTooltips = function (val) {
+//            if (!val)
+//                this.paper.gLabels.hide();
+//            this.showCursorTooltips = val;
+//            return this;
+//        };
         protaelproto.setZoom = function (zoom) {
             zoom = Math.min(zoom, 15);
             zoom = Math.max(zoom, 0.5);
