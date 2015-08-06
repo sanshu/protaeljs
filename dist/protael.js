@@ -326,13 +326,13 @@ var Protael = (function () {
             }));
         if (!showControls)
             toolbar.hide();
-        toolbar.a('&nbsp;&VerticalLine;&nbsp;');
-        toolbar.a($(
-            '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
-            .change(
-                function () {
-                    r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
-                }));
+//        toolbar.a('&nbsp;&VerticalLine;&nbsp;');
+//        toolbar.a($(
+//            '<input type="checkbox" id="chkTooltip" checked="true"><label for="chkTooltip">Cursor tooltips</label>')
+//            .change(
+//                function () {
+//                    r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
+//                }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
         toolbar.a($('<button>Export SVG</button>').button({
             text: false,
@@ -604,11 +604,9 @@ var Protael = (function () {
                 });
             }
             // //////////////////
-            // var sx = seqBGSet.transform().localMatrix.split().scalex * ds;
-            // seqBGSet.transform("S" + zoom + " 1 0 0");
 
             p.currScale = zoom;
-            p.currScale > 1 ? this.seqBGSet.show() : this.seqBGSet.hide();
+            // p.currScale > 1 ? this.seqBGSet.show() : this.seqBGSet.hide();
             p.currScale > 7 ? this.seqChars.show() : this.seqChars.hide();
             p.currScale > 7 ? this.overlayFtLabels.forEach(function (t) {
                 t.hide();
@@ -1511,7 +1509,6 @@ var Protael = (function () {
 
             this.gSequences.add(this.seqLabelsSet, this.seqBGSet, this.seqChars, this.seqLines);
             this.labelsWidth = this.seqLabelsSet.getBBox().width;
-            this.seqBGSet.hide();
             this.seqChars.hide().transform("T1, 0");
             this.gSequences.toFront();
             this.seqLines.toBack();
@@ -1569,27 +1566,29 @@ var Protael = (function () {
                 self.pointer.attr({
                     'x': x + delta
                 }).show();
-                if (parent.showCursorTooltips) {
-                    var OX = parent.toOriginalX(x);
-                    residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
-                    x += delta;
-                    self.gLabels.transform("T " + x + " 0").show();
-                    var l = residueLabel.getBBox().width;
-                    residueBg.attr({
-                        width: l
-                    });
-                    for (var q in protein.qtracks) {
-                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
-                            var lb = qtrackLbls[q],
-                                r = qtrackBgs[q];
-                            lb.node.textContent = protein.qtracks[q].values[OX];
-                            var l = lb.getBBox().width;
-                            r.attr({
-                                width: l
-                            });
-                        }
-                    }
-                }
+//                if (parent.showCursorTooltips) {
+//                    var OX = parent.toOriginalX(x);
+//                    residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
+//                    x += delta;
+//                    self.gLabels.transform("T " + x + " 0").show();
+//                    var l = residueLabel.getBBox().width;
+//                    residueBg.attr({
+//                        width: l
+//                    });
+//                    for (var q in protein.qtracks) {
+//                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
+//                            var lb = qtrackLbls[q],
+//                                r = qtrackBgs[q];
+//                            if (typeof lb != 'undefined') {
+//                                lb.node.textContent = protein.qtracks[q].values[OX];
+//                                var l = lb.getBBox().width;
+//                                r.attr({
+//                                    width: l
+//                                });
+//                            }
+//                        }
+//                    }
+//                }
             }).mouseout(function () {
                 self.gLabels.hide();
                 self.pointer.hide();
@@ -1759,12 +1758,12 @@ var Protael = (function () {
         protaelproto.toScreenX = function (x) {
             return Math.round(x * this.currScale - this.currShift);
         };
-        protaelproto.setShowCursorTooltips = function (val) {
-            if (!val)
-                this.paper.gLabels.hide();
-            this.showCursorTooltips = val;
-            return this;
-        };
+//        protaelproto.setShowCursorTooltips = function (val) {
+//            if (!val)
+//                this.paper.gLabels.hide();
+//            this.showCursorTooltips = val;
+//            return this;
+//        };
         protaelproto.setZoom = function (zoom) {
             zoom = Math.min(zoom, 15);
             zoom = Math.max(zoom, 0.5);
@@ -1881,7 +1880,7 @@ var Protael = (function () {
         };
 
         protaelproto.initTooltips = function () {
-            if (! this.tooltipCallback)
+            if (!this.tooltipCallback)
                 this.tooltip(null);
             $(document).tooltip({
                 track: true,
