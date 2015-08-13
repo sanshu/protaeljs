@@ -1550,7 +1550,8 @@ var Protael = (function () {
                 id: "blanket"
             });
             this.gLabels.add(residueBg, residueLabel);
-            paper.mousemove(function (e) {
+
+            var onMouseMove = function (e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
                     c = "#" + parent.container + ' #blanket',
@@ -1589,10 +1590,23 @@ var Protael = (function () {
 //                        }
 //                    }
 //                }
+            };
+            paper.mousemove(function (e) {
+                onMouseMove(e);
             }).mouseout(function () {
                 self.gLabels.hide();
                 self.pointer.hide();
             });
+//            this.textSet.forEach(
+//                function(t) {
+//                    t.mousemove( function(e){   onMouseMove(e)} );
+//                }
+//                );
+//            this.viewSet.forEach(
+//                function(t) {
+//                    t.mousemove( function(e){   onMouseMove(e)} );
+//                }
+//                );
             this.viewSet.push(r);
 //            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
 //            .transform("translate(0, 10)");
@@ -1618,7 +1632,7 @@ var Protael = (function () {
                 res['data-x'] = JSON.stringify(piece.dbxrefs);
             }
             target.attr(res);
-        }
+        };
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
