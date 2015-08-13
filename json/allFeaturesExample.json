@@ -1,8 +1,8 @@
 {
   "label": "gi|117928536|ref|YP_873087.1| Holliday junction resolvase YqgF [Acidothermus cellulolyticus 11B]",
-  "sequence": "MGDTAVRPGVRIGVDVGTVRIGVAVSDPDGRLAVPAETLPRDASGAGELRRLAQLVEERGAVEVVVGLPV",
+  "sequence": "MGDTAVRPGVRIGVDVGTVRIGVAVSDPDGRLAVPAETLPRDASGAGELRRLAQLVEERGAVEVVVGLPVMGDTAVRPGVRIGVDVGTVRIGVAVSDPDGRLAVPAETLPRDASGAGELRRLAQLVEERGAVEVVVGLPV",
   "seqcolors": {
-    "data": "CCCCCCCCCCEEEEECCCCEEEEEEECCCCCEECCEEEEEECCCCCHHHHHHHHHHHHHCCCEEEECCCC",
+    "data": "CCCCCCCCCCEEEEECCCCEEEEEEECCCCCEECCEEEEEECCCCCHHHHHHHHHHHHHCCCEEEECCCCCCCCCCCCCCEEEEECCCCEEEEEEECCCCCEECCEEEEEECCCCCHHHHHHHHHHHHHCCCEEEECCCC",
     "colors": {
       "C": "#DDD",
       "B": "blue",
@@ -16,11 +16,11 @@
       "E": "blue"
     }
   },
-  "alidisplay": false,
+  "alidisplay": true,
   "alignments": [
     {
       "CS": "ALI",
-      "label": "",
+      "label": "1vhx_A",
       "sequence": "RILGLDLGTKTLGVALSDEMGWTAQGIETIKNEAEGDYGLSRLSELIKDYTIDKIVLGFP",
       "description": "7.000e-14 \u003e1vhx_A 150aa 12/01/03 (X-RAY) Putative Holliday junction resolvase [BACILLUS SUBTILIS] :_: Frame:0 Round:0 Length:150",
       "start": 10,
@@ -33,7 +33,7 @@
     },
     {
       "CS": "ALI",
-      "label": "",
+      "label": "Hypothetical protein yqgF ",
       "sequence": "MSGTLLAFDFGTKSIGVAVGQRITGTARPLPAIKAQ-DGTPDWNIIERLLKEWQPDEIIVGLPL",
       "description": "3.000e-13 \u003e1ovq_A 138aa 03/27/03 (NMR) Hypothetical protein yqgF [ESCHERICHIA COLI] :_: Frame:0 Round:0 Length:138",
       "start": 7,
