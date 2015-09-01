@@ -299,15 +299,25 @@ var Protael = (function () {
             }
         }).click(function () {
             $("#xarea").text(r.getConstruct());
+            $("#cbFullselection").attr('checked', false);
             $("#xdialog").dialog("open");
         }));
         $("#xdialog").dialog({
             modal: true,
+            height: 300,
+            width: 350,
             autoOpen: false,
             buttons: {
                 Ok: function () {
                     $(this).dialog("close");
                 }
+            }
+        });
+        $("#cbFullselection").change(function () {
+            if ($(this).is(':checked')) {
+                $("#xarea").text(r.getConstruct(true));
+            } else {
+                $("#xarea").text(r.getConstruct(false));
             }
         });
         toolbar.a($('<button id="pl-reset-selection-btn">Reset selection</button>').button({
@@ -365,7 +375,7 @@ var Protael = (function () {
             newDiv = $(s),
             toolbar = $('<div class="ui-widget-header ui-corner-all protael_toolbar"></div>'),
             svgString = '<div width="100%" height="100%" class="protael_svg">' +
-            '<div><div class="protael_slider"></div></div>' +
+            //    '<div><div class="protael_slider"></div></div>' +
             '<svg id="' + container + '_svgcanvas" width="100%" height="100%" preserveAspectRatio="xMinYMin meet">'
             + '<desc>Protael ' + Protael.version + '</desc>'
             + '</svg></div>',
@@ -377,20 +387,20 @@ var Protael = (function () {
         this.protein = protein;
         iniWidth = svg.width();
         this.controlsEnabled = controls;
-        if (this.controlsEnabled) {
-            $('#' + this.container + ' .protael_slider').slider({
-                range: true,
-                min: 1,
-                max: protein.sequence.length,
-                values: [1, 1],
-                slide: function (event, ui) {
-                    self.setSelection(ui.values[0], ui.values[1]);
-                }
-            });
-        }
+//        if (this.controlsEnabled) {
+//            $('#' + this.container + ' .protael_slider').slider({
+//                range: true,
+//                min: 1,
+//                max: protein.sequence.length,
+//                values: [1, 1],
+//                slide: function (event, ui) {
+//                    self.setSelection(ui.values[0], ui.values[1]);
+//                }
+//            });
+//        }
         if (controls) {
             newDiv
-                .append('<div id="xdialog" title="Export selection"><textarea id="xarea" cols="40" rows="10"></textarea></div>');
+                .append('<div id="xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
             createToolbarBtns(this, toolbar, controls);
         }
         newDiv
@@ -408,7 +418,7 @@ var Protael = (function () {
         this.selectedx = [-1, -1]; // selection minX-maxX
 
         this.svgDiv = $('#' + container + ' .protael_svg');
-        this.selectSlider = $('#' + container + ' .protael_slider');
+//        this.selectSlider = $('#' + container + ' .protael_slider');
         this.selectInput = $('#' + container + " .protael_selection_inp");
         // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
@@ -726,9 +736,9 @@ var Protael = (function () {
                 "width": ww,
                 "viewBox": vb
             });
-            if (this.protael.selectSlider.length) {
-                this.protael.selectSlider.width(ww);
-            }
+//            if (this.protael.selectSlider.length) {
+//                this.protael.selectSlider.width(ww);
+//            }
         };
         paperproto.proteinSeqBG = function (chars, scolors, yy, showSequence, offset, label) {
             offset = offset * 1 - 1 || 0;
@@ -1551,6 +1561,22 @@ var Protael = (function () {
             });
             this.gLabels.add(residueBg, residueLabel);
 
+            var dragStart = function (x, y, event) {
+                var xx = parent.toOriginalX(x);
+                parent.setSelection(xx, xx);
+            };
+            var dragMove = function (dx, dy, x, y, event) {
+                var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
+                    ox = parent.toOriginalX(x),
+                    max = Math.max(sx, ox), min = Math.min(sx, ox);
+                parent.setSelection(min, max);
+            }
+            var dragEnd = function (event) {
+                // parent.setSelection(parent.selectedx[0], parent.toOriginalX(x));
+            }
+
+            paper.drag(dragMove, dragStart, dragEnd);
+
             var onMouseMove = function (e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
@@ -1597,6 +1623,7 @@ var Protael = (function () {
                 self.gLabels.hide();
                 self.pointer.hide();
             });
+
 //            this.textSet.forEach(
 //                function(t) {
 //                    t.mousemove( function(e){   onMouseMove(e)} );
@@ -1632,7 +1659,8 @@ var Protael = (function () {
                 res['data-x'] = JSON.stringify(piece.dbxrefs);
             }
             target.attr(res);
-        };
+        }
+        ;
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
@@ -1689,6 +1717,8 @@ var Protael = (function () {
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
+//            var minx = Math.min(min, max);
+//            var maxx = Math.max(min, max);
             this.selectedx[0] = minx;
             this.selectedx[1] = maxx;
             var wd = this.toScreenX(maxx) - this.toScreenX(minx - 1);
@@ -1719,9 +1749,9 @@ var Protael = (function () {
             if (center > this.W) {
                 center = this.W / 2;
             }
-            if (this.controlsEnabled) {
-                this.selectSlider.slider("values", [center - 1, center + 2]);
-            }
+//            if (this.controlsEnabled) {
+//                this.selectSlider.slider("values", [center - 1, center + 2]);
+//            }
             return this;
         };
         protaelproto.translate = function (dx) {
@@ -1757,14 +1787,28 @@ var Protael = (function () {
         protaelproto.currentScale = function () {
             return this.currScale;
         };
-        protaelproto.getConstruct = function () {
+        protaelproto.getConstruct = function (needFull) {
             if (this.selectedx[0] === -1)
                 return 'No selection';
             var l = this.protein.label || 'construct';
-            return ">" + l + " "
+            var text = ">" + l + " "
                 + this.selectedx[0] + ":" + this.selectedx[1] + "\n"
                 + this.protein.sequence.substring(this.selectedx[0] - 1,
                     this.selectedx[1]);
+            if (needFull) {
+                // add all sequences
+                for (var i = 0; i < this.protein.alignments.length; i++) {
+                    text += "\n>" + this.protein.alignments[i].label + "\n" +
+                        this.protein.alignments[i].sequence.substring(this.selectedx[0] - 1,
+                        this.selectedx[1]);
+                }
+                for (var i = 0; i < this.protein.qtracks.length; i++) {
+                    text += "\n>" + this.protein.qtracks[i].label + "\n" +
+                        this.protein.qtracks[i].values.slice(this.selectedx[0] - 1,
+                        this.selectedx[1]);
+                }
+            }
+            return text;
         };
         protaelproto.toOriginalX = function (x) {
             return Math.round((x + this.currShift) / this.currScale);
