@@ -275,7 +275,7 @@ var Protael = (function () {
                     r.setZoom(ui.value);
                 }
             }));
-        toolbar.a($('<button>Zoom to fit</button>').button({
+        toolbar.a($('<button id="pl-zfit-btn">Zoom to fit</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-arrow-4-diag"
@@ -283,7 +283,7 @@ var Protael = (function () {
         }).click(function () {
             r.zoomToFit();
         }));
-        toolbar.a($('<button>Zoom to selection</button>').button({
+        toolbar.a($('<button id="pl-zselection-btn">Zoom to selection</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-arrowthick-2-e-w"
@@ -310,7 +310,7 @@ var Protael = (function () {
                 }
             }
         });
-        toolbar.a($('<button>Reset selection</button>').button({
+        toolbar.a($('<button id="pl-reset-selection-btn">Reset selection</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon-refresh"
@@ -320,7 +320,7 @@ var Protael = (function () {
         }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;Coloring:');
         toolbar.a($(
-            '<select><option>Original</option><option>Clustal</option><option>Lesk</option><option>Cinema</option><option>MAEditor</option><option>ALI</option><option>None</option></select>')
+            '<select id="pl-schema-select"><option>Original</option><option>Clustal</option><option>Lesk</option><option>Cinema</option><option>MAEditor</option><option>ALI</option><option>None</option></select>')
             .change(function () {
                 r.setColoringScheme($(this).val());
             }));
@@ -334,7 +334,7 @@ var Protael = (function () {
 //                    r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
 //                }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
-        toolbar.a($('<button>Export SVG</button>').button({
+        toolbar.a($('<button id="pl-export-svg-btn">Export SVG</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-image"
@@ -460,7 +460,7 @@ var Protael = (function () {
         this.overlayFtLabels = Snap.set(); // contains labels for overlay features (for
         // switching views on zoomin/out)
         this.createDefs();
-//
+
         //Groups to hold different parts of the plot//
         this.gAxes = p.g().attr({id: "axes"}); // axes and lanels
         this.gSequences = p.g().attr({id: "seqs"}); // sequence chars and backgrounds
@@ -811,6 +811,8 @@ var Protael = (function () {
             this.seqLineCovers.add(rect);
             this.seqLines.add(line);
             this.viewSet.push(line, rect);
+            if (label)
+                self.seqLabelsSet.add(this.paper.text(1, y + 5, label));
             if (showSequence) {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
                 if (this.isChrome) {
@@ -838,8 +840,6 @@ var Protael = (function () {
                             }
                             self.seqChars.add(allchars);
                         }
-                        // if (label)
-                        // seqLabelsSet.add(paper.text(1, y + 5, label));
                     }, 10);
                 }
             }
