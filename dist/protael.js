@@ -262,6 +262,7 @@ var Protael = (function () {
      * @param {Boolean} showControls - whether or not toolbar should be visible
      */
     function createToolbarBtns(r, toolbar, showControls) {
+        var container = r.container;
         toolbar.a = toolbar.append;
         toolbar.a('Zoom:');
         toolbar.a($(
@@ -275,7 +276,7 @@ var Protael = (function () {
                     r.setZoom(ui.value);
                 }
             }));
-        toolbar.a($('<button>Zoom to fit</button>').button({
+        toolbar.a($('<button id="pl-zfit-btn">Zoom to fit</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-arrow-4-diag"
@@ -283,7 +284,7 @@ var Protael = (function () {
         }).click(function () {
             r.zoomToFit();
         }));
-        toolbar.a($('<button>Zoom to selection</button>').button({
+        toolbar.a($('<button id="pl-zselection-btn">Zoom to selection</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-arrowthick-2-e-w"
@@ -298,11 +299,14 @@ var Protael = (function () {
                 primary: "ui-icon-disk"
             }
         }).click(function () {
-            $("#xarea").text(r.getConstruct());
-            $("#xdialog").dialog("open");
+            $("#"+container+"_xarea").text(r.getConstruct());
+            $("#"+container+"_cbFullselection").attr('checked', false);
+            $("#"+container+"_xdialog").dialog("open");
         }));
-        $("#xdialog").dialog({
+        $("#"+container+"_xdialog").dialog({
             modal: true,
+            height: 300,
+            width: 350,
             autoOpen: false,
             buttons: {
                 Ok: function () {
@@ -310,7 +314,14 @@ var Protael = (function () {
                 }
             }
         });
-        toolbar.a($('<button>Reset selection</button>').button({
+        $("#"+container+"_cbFullselection").change(function () {
+            if ($(this).is(':checked')) {
+                $("#"+container+"_xarea").text(r.getConstruct(true));
+            } else {
+                $("#"+container+"_xarea").text(r.getConstruct(false));
+            }
+        });
+        toolbar.a($('<button id="pl-reset-selection-btn">Reset selection</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon-refresh"
@@ -320,7 +331,7 @@ var Protael = (function () {
         }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;Coloring:');
         toolbar.a($(
-            '<select><option>Original</option><option>Clustal</option><option>Lesk</option><option>Cinema</option><option>MAEditor</option><option>ALI</option><option>None</option></select>')
+            '<select id="pl-schema-select"><option>Original</option><option>Clustal</option><option>Lesk</option><option>Cinema</option><option>MAEditor</option><option>ALI</option><option>None</option></select>')
             .change(function () {
                 r.setColoringScheme($(this).val());
             }));
@@ -334,7 +345,7 @@ var Protael = (function () {
 //                    r.setShowCursorTooltips($("#chkTooltip").is(':checked'));
 //                }));
         toolbar.a('&nbsp;&VerticalLine;&nbsp;');
-        toolbar.a($('<button>Export SVG</button>').button({
+        toolbar.a($('<button id="pl-export-svg-btn">Export SVG</button>').button({
             text: false,
             icons: {
                 primary: "ui-icon ui-icon-image"
@@ -342,8 +353,8 @@ var Protael = (function () {
         }).click(function () {
             r.saveAsSVG();
         }));
-        // toolbar.append('ScreenX: <input type="text" id="sx_inp" readonly/>');
-        // toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
+//         toolbar.append('ScreenX: <input type="text" id="sx_inp" readonly/>');
+//         toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
     }
 
     /**
@@ -365,7 +376,7 @@ var Protael = (function () {
             newDiv = $(s),
             toolbar = $('<div class="ui-widget-header ui-corner-all protael_toolbar"></div>'),
             svgString = '<div width="100%" height="100%" class="protael_svg">' +
-            '<div><div class="protael_slider"></div></div>' +
+            //    '<div><div class="protael_slider"></div></div>' +
             '<svg id="' + container + '_svgcanvas" width="100%" height="100%" preserveAspectRatio="xMinYMin meet">'
             + '<desc>Protael ' + Protael.version + '</desc>'
             + '</svg></div>',
@@ -377,20 +388,20 @@ var Protael = (function () {
         this.protein = protein;
         iniWidth = svg.width();
         this.controlsEnabled = controls;
-        if (this.controlsEnabled) {
-            $('#' + this.container + ' .protael_slider').slider({
-                range: true,
-                min: 1,
-                max: protein.sequence.length,
-                values: [1, 1],
-                slide: function (event, ui) {
-                    self.setSelection(ui.values[0], ui.values[1]);
-                }
-            });
-        }
+//        if (this.controlsEnabled) {
+//            $('#' + this.container + ' .protael_slider').slider({
+//                range: true,
+//                min: 1,
+//                max: protein.sequence.length,
+//                values: [1, 1],
+//                slide: function (event, ui) {
+//                    self.setSelection(ui.values[0], ui.values[1]);
+//                }
+//            });
+//        }
         if (controls) {
             newDiv
-                .append('<div id="xdialog" title="Export selection"><textarea id="xarea" cols="40" rows="10"></textarea></div>');
+                .append('<div id="'+container+'_xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="'+container+'_cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="'+container+'_xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
             createToolbarBtns(this, toolbar, controls);
         }
         newDiv
@@ -408,7 +419,7 @@ var Protael = (function () {
         this.selectedx = [-1, -1]; // selection minX-maxX
 
         this.svgDiv = $('#' + container + ' .protael_svg');
-        this.selectSlider = $('#' + container + ' .protael_slider');
+//        this.selectSlider = $('#' + container + ' .protael_slider');
         this.selectInput = $('#' + container + " .protael_selection_inp");
         // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
@@ -460,7 +471,7 @@ var Protael = (function () {
         this.overlayFtLabels = Snap.set(); // contains labels for overlay features (for
         // switching views on zoomin/out)
         this.createDefs();
-//
+
         //Groups to hold different parts of the plot//
         this.gAxes = p.g().attr({id: "axes"}); // axes and lanels
         this.gSequences = p.g().attr({id: "seqs"}); // sequence chars and backgrounds
@@ -726,9 +737,9 @@ var Protael = (function () {
                 "width": ww,
                 "viewBox": vb
             });
-            if (this.protael.selectSlider.length) {
-                this.protael.selectSlider.width(ww);
-            }
+//            if (this.protael.selectSlider.length) {
+//                this.protael.selectSlider.width(ww);
+//            }
         };
         paperproto.proteinSeqBG = function (chars, scolors, yy, showSequence, offset, label) {
             offset = offset * 1 - 1 || 0;
@@ -787,7 +798,7 @@ var Protael = (function () {
             y = y || 10;
             var p = this.paper,
                 self = this,
-                label = alignment.description || alignment.label || alignment.id,
+                label = alignment.label || alignment.id || alignment.description,
                 sequenceGroup = p.g().attr({id: "SG_" + label, "title": label || ''}),
                 startX = alignment.start - 1 || 0,
                 inst = this.protael,
@@ -811,6 +822,11 @@ var Protael = (function () {
             this.seqLineCovers.add(rect);
             this.seqLines.add(line);
             this.viewSet.push(line, rect);
+            if (label) {
+                var mxL = 25;
+                var lbltext =
+                    self.seqLabelsSet.add(this.paper.text(1, y, label.substr(0, 25)));
+            }
             if (showSequence) {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
                 if (this.isChrome) {
@@ -838,8 +854,6 @@ var Protael = (function () {
                             }
                             self.seqChars.add(allchars);
                         }
-                        // if (label)
-                        // seqLabelsSet.add(paper.text(1, y + 5, label));
                     }, 10);
                 }
             }
@@ -1548,17 +1562,35 @@ var Protael = (function () {
                 stroke: "#fff",
                 opacity: 0,
                 id: "blanket"
-            });
+            }),
+                elBlanket = $("#" + parent.container + ' #blanket');
+            ;
             this.gLabels.add(residueBg, residueLabel);
+
+            var dragStart = function (x, y, e) {
+                parent.clearSelection();
+                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1;
+                //  console.log("start: " + xx + "(" + x + ")");
+                parent.setSelection(xx, xx);
+            };
+            var dragMove = function (dx, dy, x, y, event) {
+                var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
+                    ox = parent.toOriginalX(x - elBlanket.offset().left) + 1,
+                    max = Math.max(sx, ox), min = Math.min(sx, ox);
+                //console.log("move: " + min + ";" + max);
+                parent.setSelection(min, max);
+            };
+            var dragEnd = function (event) {
+            };
+
+            paper.drag(dragMove, dragStart, dragEnd);
 
             var onMouseMove = function (e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
-                    c = "#" + parent.container + ' #blanket',
                     delta = 5, x;
                 if (xoff === undefined) { // Firefox fix
-                    var q = $(c);
-                    xoff = e.pageX - q.offset().left;
+                    xoff = e.pageX - elBlanket.offset().left;
                 }
 
                 x = Math.round(xoff + parent.currShift);
@@ -1597,16 +1629,7 @@ var Protael = (function () {
                 self.gLabels.hide();
                 self.pointer.hide();
             });
-//            this.textSet.forEach(
-//                function(t) {
-//                    t.mousemove( function(e){   onMouseMove(e)} );
-//                }
-//                );
-//            this.viewSet.forEach(
-//                function(t) {
-//                    t.mousemove( function(e){   onMouseMove(e)} );
-//                }
-//                );
+
             this.viewSet.push(r);
 //            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
 //            .transform("translate(0, 10)");
@@ -1632,7 +1655,8 @@ var Protael = (function () {
                 res['data-x'] = JSON.stringify(piece.dbxrefs);
             }
             target.attr(res);
-        };
+        }
+        ;
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
@@ -1689,6 +1713,8 @@ var Protael = (function () {
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
+//            var minx = Math.min(min, max);
+//            var maxx = Math.max(min, max);
             this.selectedx[0] = minx;
             this.selectedx[1] = maxx;
             var wd = this.toScreenX(maxx) - this.toScreenX(minx - 1);
@@ -1719,9 +1745,9 @@ var Protael = (function () {
             if (center > this.W) {
                 center = this.W / 2;
             }
-            if (this.controlsEnabled) {
-                this.selectSlider.slider("values", [center - 1, center + 2]);
-            }
+//            if (this.controlsEnabled) {
+//                this.selectSlider.slider("values", [center - 1, center + 2]);
+//            }
             return this;
         };
         protaelproto.translate = function (dx) {
@@ -1757,17 +1783,48 @@ var Protael = (function () {
         protaelproto.currentScale = function () {
             return this.currScale;
         };
-        protaelproto.getConstruct = function () {
+        /*
+         * Returns FASTA-formatted construct. If needFuul = true, will
+         * return also corresponding data for qtracks and alignments
+         * @param {type} needFull
+         * @returns {String} FASTA-formatted construct data
+         */
+        protaelproto.getConstruct = function (needFull) {
             if (this.selectedx[0] === -1)
                 return 'No selection';
             var l = this.protein.label || 'construct';
-            return ">" + l + " "
+            var text = ">" + l + " "
                 + this.selectedx[0] + ":" + this.selectedx[1] + "\n"
                 + this.protein.sequence.substring(this.selectedx[0] - 1,
                     this.selectedx[1]);
+            if (needFull) {
+                // add all sequences
+                if (this.protein.alignments) {
+                    var l;
+                    for (var i = 0; i < this.protein.alignments.length; i++) {
+                        var a = this.protein.alignments[i], sh = a.start-1;
+                        l = a.label || a.description || a.id || "seq " + (i + 1);
+                        text += "\n>" + l + "\n" +
+                            a.sequence.substring(this.selectedx[0] - 1 - sh,
+                                this.selectedx[1] - sh);
+                    }
+                }
+                if (this.protein.qtracks) {
+                    for (var i = 0; i < this.protein.qtracks.length; i++) {
+                        if (this.protein.qtracks[i].values || this.protein.qtracks[i].values.length > 0) {
+                            text += "\n>" + this.protein.qtracks[i].label + "\n" +
+                                this.protein.qtracks[i].values.slice(this.selectedx[0] - 1,
+                                this.selectedx[1]);
+                        }
+                    }
+                }
+            }
+            return text;
         };
         protaelproto.toOriginalX = function (x) {
-            return Math.round((x + this.currShift) / this.currScale);
+            var y = Math.round((x + this.currShift) / this.currScale);
+            // console.log("toOrig (" + x + ") = Math.round((" + x + " + " + this.currShift + ") / " + this.currScale + ")=" + y);
+            return y;
         };
         protaelproto.toScreenX = function (x) {
             return Math.round(x * this.currScale - this.currShift);

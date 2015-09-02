@@ -262,6 +262,7 @@ var Protael = (function () {
      * @param {Boolean} showControls - whether or not toolbar should be visible
      */
     function createToolbarBtns(r, toolbar, showControls) {
+        var container = r.container;
         toolbar.a = toolbar.append;
         toolbar.a('Zoom:');
         toolbar.a($(
@@ -298,11 +299,11 @@ var Protael = (function () {
                 primary: "ui-icon-disk"
             }
         }).click(function () {
-            $("#xarea").text(r.getConstruct());
-            $("#cbFullselection").attr('checked', false);
-            $("#xdialog").dialog("open");
+            $("#"+container+"_xarea").text(r.getConstruct());
+            $("#"+container+"_cbFullselection").attr('checked', false);
+            $("#"+container+"_xdialog").dialog("open");
         }));
-        $("#xdialog").dialog({
+        $("#"+container+"_xdialog").dialog({
             modal: true,
             height: 300,
             width: 350,
@@ -313,11 +314,11 @@ var Protael = (function () {
                 }
             }
         });
-        $("#cbFullselection").change(function () {
+        $("#"+container+"_cbFullselection").change(function () {
             if ($(this).is(':checked')) {
-                $("#xarea").text(r.getConstruct(true));
+                $("#"+container+"_xarea").text(r.getConstruct(true));
             } else {
-                $("#xarea").text(r.getConstruct(false));
+                $("#"+container+"_xarea").text(r.getConstruct(false));
             }
         });
         toolbar.a($('<button id="pl-reset-selection-btn">Reset selection</button>').button({
@@ -352,8 +353,8 @@ var Protael = (function () {
         }).click(function () {
             r.saveAsSVG();
         }));
-        // toolbar.append('ScreenX: <input type="text" id="sx_inp" readonly/>');
-        // toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
+//         toolbar.append('ScreenX: <input type="text" id="sx_inp" readonly/>');
+//         toolbar.append('RealX: <input type="text" id="rx_inp" readonly/>');
     }
 
     /**
@@ -400,7 +401,7 @@ var Protael = (function () {
 //        }
         if (controls) {
             newDiv
-                .append('<div id="xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
+                .append('<div id="'+container+'_xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="'+container+'_cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="'+container+'_xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
             createToolbarBtns(this, toolbar, controls);
         }
         newDiv
@@ -797,7 +798,7 @@ var Protael = (function () {
             y = y || 10;
             var p = this.paper,
                 self = this,
-                label = alignment.description || alignment.label || alignment.id,
+                label = alignment.label || alignment.id || alignment.description,
                 sequenceGroup = p.g().attr({id: "SG_" + label, "title": label || ''}),
                 startX = alignment.start - 1 || 0,
                 inst = this.protael,
@@ -821,8 +822,11 @@ var Protael = (function () {
             this.seqLineCovers.add(rect);
             this.seqLines.add(line);
             this.viewSet.push(line, rect);
-            if (label)
-                self.seqLabelsSet.add(this.paper.text(1, y + 5, label));
+            if (label) {
+                var mxL = 25;
+                var lbltext =
+                    self.seqLabelsSet.add(this.paper.text(1, y, label.substr(0, 25)));
+            }
             if (showSequence) {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
                 if (this.isChrome) {
@@ -1558,33 +1562,35 @@ var Protael = (function () {
                 stroke: "#fff",
                 opacity: 0,
                 id: "blanket"
-            });
+            }),
+                elBlanket = $("#" + parent.container + ' #blanket');
+            ;
             this.gLabels.add(residueBg, residueLabel);
 
-            var dragStart = function (x, y, event) {
-                var xx = parent.toOriginalX(x);
+            var dragStart = function (x, y, e) {
+                parent.clearSelection();
+                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1;
+                //  console.log("start: " + xx + "(" + x + ")");
                 parent.setSelection(xx, xx);
             };
             var dragMove = function (dx, dy, x, y, event) {
                 var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
-                    ox = parent.toOriginalX(x),
+                    ox = parent.toOriginalX(x - elBlanket.offset().left) + 1,
                     max = Math.max(sx, ox), min = Math.min(sx, ox);
+                //console.log("move: " + min + ";" + max);
                 parent.setSelection(min, max);
-            }
+            };
             var dragEnd = function (event) {
-                // parent.setSelection(parent.selectedx[0], parent.toOriginalX(x));
-            }
+            };
 
             paper.drag(dragMove, dragStart, dragEnd);
 
             var onMouseMove = function (e) {
                 e = e || window.event;
                 var xoff = e.offsetX,
-                    c = "#" + parent.container + ' #blanket',
                     delta = 5, x;
                 if (xoff === undefined) { // Firefox fix
-                    var q = $(c);
-                    xoff = e.pageX - q.offset().left;
+                    xoff = e.pageX - elBlanket.offset().left;
                 }
 
                 x = Math.round(xoff + parent.currShift);
@@ -1624,16 +1630,6 @@ var Protael = (function () {
                 self.pointer.hide();
             });
 
-//            this.textSet.forEach(
-//                function(t) {
-//                    t.mousemove( function(e){   onMouseMove(e)} );
-//                }
-//                );
-//            this.viewSet.forEach(
-//                function(t) {
-//                    t.mousemove( function(e){   onMouseMove(e)} );
-//                }
-//                );
             this.viewSet.push(r);
 //            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
 //            .transform("translate(0, 10)");
@@ -1787,6 +1783,12 @@ var Protael = (function () {
         protaelproto.currentScale = function () {
             return this.currScale;
         };
+        /*
+         * Returns FASTA-formatted construct. If needFuul = true, will
+         * return also corresponding data for qtracks and alignments
+         * @param {type} needFull
+         * @returns {String} FASTA-formatted construct data
+         */
         protaelproto.getConstruct = function (needFull) {
             if (this.selectedx[0] === -1)
                 return 'No selection';
@@ -1797,21 +1799,32 @@ var Protael = (function () {
                     this.selectedx[1]);
             if (needFull) {
                 // add all sequences
-                for (var i = 0; i < this.protein.alignments.length; i++) {
-                    text += "\n>" + this.protein.alignments[i].label + "\n" +
-                        this.protein.alignments[i].sequence.substring(this.selectedx[0] - 1,
-                        this.selectedx[1]);
+                if (this.protein.alignments) {
+                    var l;
+                    for (var i = 0; i < this.protein.alignments.length; i++) {
+                        var a = this.protein.alignments[i], sh = a.start-1;
+                        l = a.label || a.description || a.id || "seq " + (i + 1);
+                        text += "\n>" + l + "\n" +
+                            a.sequence.substring(this.selectedx[0] - 1 - sh,
+                                this.selectedx[1] - sh);
+                    }
                 }
-                for (var i = 0; i < this.protein.qtracks.length; i++) {
-                    text += "\n>" + this.protein.qtracks[i].label + "\n" +
-                        this.protein.qtracks[i].values.slice(this.selectedx[0] - 1,
-                        this.selectedx[1]);
+                if (this.protein.qtracks) {
+                    for (var i = 0; i < this.protein.qtracks.length; i++) {
+                        if (this.protein.qtracks[i].values || this.protein.qtracks[i].values.length > 0) {
+                            text += "\n>" + this.protein.qtracks[i].label + "\n" +
+                                this.protein.qtracks[i].values.slice(this.selectedx[0] - 1,
+                                this.selectedx[1]);
+                        }
+                    }
                 }
             }
             return text;
         };
         protaelproto.toOriginalX = function (x) {
-            return Math.round((x + this.currShift) / this.currScale);
+            var y = Math.round((x + this.currShift) / this.currScale);
+            // console.log("toOrig (" + x + ") = Math.round((" + x + " + " + this.currShift + ") / " + this.currScale + ")=" + y);
+            return y;
         };
         protaelproto.toScreenX = function (x) {
             return Math.round(x * this.currScale - this.currShift);

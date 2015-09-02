@@ -44,7 +44,11 @@ text
     width: 15px;
 }
 #xdialog {
-    font-size: 50%;
+    font-size: 80%;
+}
+#xdialog textArea { 
+    font-family: monospace; 
+    width:100%;
 }
 .ui-tooltip {
     border: 1px solid white;
@@ -89,6 +93,10 @@ text
 /* GRAPH ELEMENTS*/
 svg{
     background: #FFF;
+
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
 }
 
 /* Features*/

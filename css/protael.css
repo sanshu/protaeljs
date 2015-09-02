@@ -44,7 +44,11 @@ text
     width: 15px;
 }
 #xdialog {
-    font-size: 50%;
+    font-size: 80%;
+}
+#xdialog textArea { 
+    font-family: monospace; 
+    width:100%;
 }
 .ui-tooltip {
     border: 1px solid white;
