@@ -299,11 +299,11 @@ var Protael = (function () {
                 primary: "ui-icon-disk"
             }
         }).click(function () {
-            $("#"+container+"_xarea").text(r.getConstruct());
-            $("#"+container+"_cbFullselection").attr('checked', false);
-            $("#"+container+"_xdialog").dialog("open");
+            $("#" + container + "_xarea").text(r.getConstruct());
+            $("#" + container + "_cbFullselection").attr('checked', false);
+            $("#" + container + "_xdialog").dialog("open");
         }));
-        $("#"+container+"_xdialog").dialog({
+        $("#" + container + "_xdialog").dialog({
             modal: true,
             height: 300,
             width: 350,
@@ -314,11 +314,11 @@ var Protael = (function () {
                 }
             }
         });
-        $("#"+container+"_cbFullselection").change(function () {
+        $("#" + container + "_cbFullselection").change(function () {
             if ($(this).is(':checked')) {
-                $("#"+container+"_xarea").text(r.getConstruct(true));
+                $("#" + container + "_xarea").text(r.getConstruct(true));
             } else {
-                $("#"+container+"_xarea").text(r.getConstruct(false));
+                $("#" + container + "_xarea").text(r.getConstruct(false));
             }
         });
         toolbar.a($('<button id="pl-reset-selection-btn">Reset selection</button>').button({
@@ -401,7 +401,7 @@ var Protael = (function () {
 //        }
         if (controls) {
             newDiv
-                .append('<div id="'+container+'_xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="'+container+'_cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="'+container+'_xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
+                .append('<div id="' + container + '_xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="' + container + '_cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="' + container + '_xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
             createToolbarBtns(this, toolbar, controls);
         }
         newDiv
@@ -1586,19 +1586,11 @@ var Protael = (function () {
             paper.drag(dragMove, dragStart, dragEnd);
 
             var onMouseMove = function (e) {
-                e = e || window.event;
-                var xoff = e.offsetX,
-                    delta = 5, x;
-                if (xoff === undefined) { // Firefox fix
-                    xoff = e.pageX - elBlanket.offset().left;
-                }
-
-                x = Math.round(xoff + parent.currShift);
-                if (x < 0)
-                    return;
+                //adding 5 to shift it a bit from the mouse
                 self.pointer.attr({
-                    'x': x + delta
-                }).show();
+                    'x': e.pageX - elBlanket.offset().left + 5
+                });//.show();
+                //
 //                if (parent.showCursorTooltips) {
 //                    var OX = parent.toOriginalX(x);
 //                    residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
@@ -1626,8 +1618,11 @@ var Protael = (function () {
             paper.mousemove(function (e) {
                 onMouseMove(e);
             }).mouseout(function () {
+                self.pointer.attr({
+                    'x': -5
+                })
                 self.gLabels.hide();
-                self.pointer.hide();
+                // self.pointer.hide();
             });
 
             this.viewSet.push(r);
@@ -1802,7 +1797,7 @@ var Protael = (function () {
                 if (this.protein.alignments) {
                     var l;
                     for (var i = 0; i < this.protein.alignments.length; i++) {
-                        var a = this.protein.alignments[i], sh = a.start-1;
+                        var a = this.protein.alignments[i], sh = a.start - 1;
                         l = a.label || a.description || a.id || "seq " + (i + 1);
                         text += "\n>" + l + "\n" +
                             a.sequence.substring(this.selectedx[0] - 1 - sh,
