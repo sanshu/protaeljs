@@ -431,7 +431,7 @@ var Protael = (function () {
         this.H = Utils.calcHeight(this.protein);
         this.W = this.protein.sequence.length;
         this.paper.setSize(this.W, this.H);
-        this.paper.axis(this.W, 10);
+        this.paper.axis(this.W, 10).toBack();
         newDiv.resizable({
             stop: function (ev, ui) {
                 self.zoomToFit();
