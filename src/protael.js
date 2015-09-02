@@ -1586,44 +1586,27 @@ var Protael = (function () {
             paper.drag(dragMove, dragStart, dragEnd);
 
             var onMouseMove = function (e) {
+                //  console.log("x = e.pageX(" + e.pageX + ") - elBlanket.offset().left(" + elBlanket.offset().left + ") = " + (e.pageX - elBlanket.offset().left));
+
                 //adding 5 to shift it a bit from the mouse
                 self.pointer.attr({
                     'x': e.pageX - elBlanket.offset().left + 5
-                });//.show();
-                //
-//                if (parent.showCursorTooltips) {
-//                    var OX = parent.toOriginalX(x);
-//                    residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
-//                    x += delta;
-//                    self.gLabels.transform("T " + x + " 0").show();
-//                    var l = residueLabel.getBBox().width;
-//                    residueBg.attr({
-//                        width: l
-//                    });
-//                    for (var q in protein.qtracks) {
-//                        if (protein.qtracks[q].values && protein.qtracks[q].values.length) {
-//                            var lb = qtrackLbls[q],
-//                                r = qtrackBgs[q];
-//                            if (typeof lb != 'undefined') {
-//                                lb.node.textContent = protein.qtracks[q].values[OX];
-//                                var l = lb.getBBox().width;
-//                                r.attr({
-//                                    width: l
-//                                });
-//                            }
-//                        }
-//                    }
-//                }
+                });
             };
+            self.pointer.mousemove(function (e) {
+                onMouseMove(e);
+            });
             paper.mousemove(function (e) {
                 onMouseMove(e);
-            }).mouseout(function () {
-                self.pointer.attr({
-                    'x': -5
-                })
-                self.gLabels.hide();
+            })
+                //.mouseout(function () { // this causes cursor to dissappear in FF at some locations
+//                self.pointer.attr({
+//                    'x': -5
+//                })
+                // self.gLabels.hide();
                 // self.pointer.hide();
-            });
+                // })
+                ;
 
             this.viewSet.push(r);
 //            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
