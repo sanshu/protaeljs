@@ -1289,7 +1289,8 @@ var Protael = (function () {
         };
         paperproto.proteinMarkers = function (markers, topY) {
             var markerGp = this.paper.g().attr({
-                id: "gMarkers"
+                id: "gMarkers",
+                class:"pl-marker"
             }),
                 i,
                 m,
