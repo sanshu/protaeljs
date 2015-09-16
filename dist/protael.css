@@ -93,12 +93,10 @@ text
 /* GRAPH ELEMENTS*/
 svg{
     background: #FFF;
-
     -webkit-user-select: none;  /* Chrome all / Safari all */
     -moz-user-select: none;     /* Firefox all */
     -ms-user-select: none;      /* IE 10+ */
 }
-
 /* Features*/
 .pl-ftrack{
     text-anchor: left;
@@ -109,22 +107,22 @@ svg{
         line-height: normal; */
     font-family: Arial;
 }
-
+.pl-ftrack-label{ 
+    font-size: 14px;
+    text-anchor: start;
+}
 .pl-feature {
     fill: blue;
     stroke: #bbb
 }
-
 .pl-feature:hover {
     stroke-width: 3px
 }
-
 .pl-feature-label {
     stroke:none !important;
     stroke-width:0px;
     fill: #000;
 }
-
 .pl-highlight{
     fill:#FF0 !important;
 }
@@ -150,43 +148,34 @@ svg{
     font: 10px Arial;
     fill: #000
 }
+#axes .minor {
+    stroke: #eee
+}
+#axes .major {
+    stroke: #ccc
+}
 
 .pl-chart{/*this class for marking qtrack group only, will not affect appearance*/}
-
 .pl-chart-top, .pl-chart-bottom{
     stroke:none;
     stroke-width: 1px;
     stroke-dasharray: "5,5";
 }
-
 .pl-chart-label{ 
     font-size: 14px;
     text-anchor: start;
+    fill:#000;
 }
-
 .pl-chart-area{
     stroke-width: 0.1;
     stroke-linejoin: round;
     stroke-linecap: butt;
     opacity: 0.7;
 }
-
 .pl-chart-center{
     stroke:#BBB;
     stroke-width: 1px;
     stroke-dasharray: "5,5";
-}
-#axes .minor {
-    stroke: #eee
-}
-
-#axes .major {
-    stroke: #ccc
-}
-
-.pl-ftrack-label{ 
-    font-size: 14px;
-    text-anchor: start;
 }
 .pl-bridge {
     font-size: 10px;
@@ -196,3 +185,4 @@ svg{
     stroke-linejoin: round;
     stroke-linecap: round;
 }
+.pl-marker{/*this class for marking group only, do not use to change appearance*/}
