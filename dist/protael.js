@@ -247,10 +247,12 @@ var Protael = (function () {
             schemaName = schemaName.toLowerCase();
             return schema[schemaName] || schema.clustal;
         }
+        ;
 
-        function addCSchema(schemaName, schema) {
+        function addCSchema(schemaName, schemas) {
             schema[schemaName] = schemas;
         }
+        ;
 
         return {getCSchema: getCSchema, addCSchema: addCSchema};
     }());
@@ -376,7 +378,6 @@ var Protael = (function () {
             newDiv = $(s),
             toolbar = $('<div class="ui-widget-header ui-corner-all protael_toolbar"></div>'),
             svgString = '<div width="100%" height="100%" class="protael_svg">' +
-            //    '<div><div class="protael_slider"></div></div>' +
             '<svg id="' + container + '_svgcanvas" width="100%" height="100%" preserveAspectRatio="xMinYMin meet">'
             + '<desc>Protael ' + Protael.version + '</desc>'
             + '</svg></div>',
@@ -388,17 +389,7 @@ var Protael = (function () {
         this.protein = protein;
         iniWidth = svg.width();
         this.controlsEnabled = controls;
-//        if (this.controlsEnabled) {
-//            $('#' + this.container + ' .protael_slider').slider({
-//                range: true,
-//                min: 1,
-//                max: protein.sequence.length,
-//                values: [1, 1],
-//                slide: function (event, ui) {
-//                    self.setSelection(ui.values[0], ui.values[1]);
-//                }
-//            });
-//        }
+
         if (controls) {
             newDiv
                 .append('<div id="' + container + '_xdialog" title="Export selection"><form><fieldset><input type="checkbox" id="' + container + '_cbFullselection">Include data from all graphs and sequences<br/><br/><textarea id="' + container + '_xarea" cols="40" rows="10"></textarea></fieldset></form></div>');
@@ -406,6 +397,7 @@ var Protael = (function () {
         }
         newDiv
             .append('<div id="propsdialog" title="Properties"></div>');
+        // Dialog to display xternal links
         $("#propsdialog").dialog({
             modal: true,
             autoOpen: false,
@@ -419,11 +411,11 @@ var Protael = (function () {
         this.selectedx = [-1, -1]; // selection minX-maxX
 
         this.svgDiv = $('#' + container + ' .protael_svg');
-//        this.selectSlider = $('#' + container + ' .protael_slider');
         this.selectInput = $('#' + container + " .protael_selection_inp");
         // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
             .indexOf('Opera') >= 0);
+        console.log("Can use stretchable seq: " + this.isChrome);
         this.currScale = 1;
         this.currShift = 0;
         this.showCursorTooltips = true;
@@ -438,6 +430,7 @@ var Protael = (function () {
             }
         });
     }
+    ;
 
     /**
      * Paper object for drawing.
@@ -467,6 +460,8 @@ var Protael = (function () {
         });
         this.viewSet = Snap.set(); // contains all objects for scaling
         this.textSet = Snap.set(); // contains all text elements of the canvas
+        this.outsideLabelsSet = Snap.set(); //contains all labels which has to be outside
+        this.outsideLabelsSet.width = 0;
         this.textSet.push(this.pLink);
         this.overlayFtLabels = Snap.set(); // contains labels for overlay features (for
         // switching views on zoomin/out)
@@ -516,7 +511,7 @@ var Protael = (function () {
          */
         paperproto.setSize = function (w, h) {
             var p = this.paper, vb = p.attr("viewBox"),
-                vbl = this.pLink.getBBox(),
+                // vbl = this.pLink.getBBox(),
                 hh = ''.concat(h).concat('px');
             vb.height = h;
             p.attr({
@@ -538,7 +533,7 @@ var Protael = (function () {
             return this.paper.attr("width");
         };
         /**
-         *
+         * Sets zoom for the view.
          * @param {number} zoom - requested zoom
          * @returns {undefined}
          */
@@ -627,7 +622,7 @@ var Protael = (function () {
             return this;
         };
         /**
-         *
+         * Draws gridlines.
          * @param {number} w
          * @param {number} dx
          * @returns {_L399.paperproto.gAxes}
@@ -638,18 +633,18 @@ var Protael = (function () {
                 H = this.protael.H,
                 p = this.paper,
                 axesLabels = p.g().attr({
-                id: "axLbls",
-                'class': "pl-axeslbl"
+                id: "gridLbls",
+                'class': "pl-grid-label"
             });
             for (i = 0; i <= maxI; i++) {
                 l = p.line(Math.round(i * dx), 0, Math.round(i * dx), H);
                 if (i % 5 === 0) {
-                    l.attr({'class': 'major'});
+                    l.attr({'class': 'pl-grid-major'});
                     t = p.text(i * dx, 8, i * dx);
                     this.textSet.push(t);
                     axesLabels.add(t);
                 } else {
-                    l.attr({'class': 'minor'});
+                    l.attr({'class': 'pl-grid-minor'});
                 }
                 this.gAxes.add(l);
                 this.viewSet.push(l);
@@ -658,6 +653,14 @@ var Protael = (function () {
             this.gAxes.add(axesLabels);
             return this.gAxes;
         };
+
+        paperproto.addOutsideLabel = function (labelEl) {
+            this.outsideLabelsSet.push(labelEl);
+            var bb = labelEl.getBBox();
+            this.outsideLabelsSet.width = this.outsideLabelsSet.width > bb.width ?
+                this.outsideLabelsSet.width : bb.width;
+        };
+
         paperproto.createDefs = function () {
             var p = this.paper,
                 dx = 5, dy = 8, y = 38,
@@ -737,9 +740,6 @@ var Protael = (function () {
                 "width": ww,
                 "viewBox": vb
             });
-//            if (this.protael.selectSlider.length) {
-//                this.protael.selectSlider.width(ww);
-//            }
         };
         paperproto.proteinSeqBG = function (chars, scolors, yy, showSequence, offset, label) {
             offset = offset * 1 - 1 || 0;
@@ -823,9 +823,9 @@ var Protael = (function () {
             this.seqLines.add(line);
             this.viewSet.push(line, rect);
             if (label) {
-                var mxL = 25;
-                var lbltext =
-                    self.seqLabelsSet.add(this.paper.text(1, y, label.substr(0, 25)));
+                var mxL = 25, lblText = this.paper.text(1, y, label.substr(0, mxL));
+                self.seqLabelsSet.add(lblText);
+                this.addOutsideLabel(lblText);
             }
             if (showSequence) {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
@@ -961,7 +961,6 @@ var Protael = (function () {
                 lastLevel = 0,
                 ft, delta,
                 f,
-                dataatt,
                 maxF = ftrack.features.length;
             this.gFTracks.add(g);
             seenDeltas.push(0);
@@ -1031,6 +1030,7 @@ var Protael = (function () {
             if (!isOverlay) {
                 var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
                 g.append(label);
+                this.addOutsideLabel(label);
             }
             g.transform("translate(0, " + topY + ")");
             g.dragVertical();
@@ -1271,11 +1271,22 @@ var Protael = (function () {
                 console.log("Unknown chart type :" + type);
             }
 
-            var label = paper.text(.1, 8, qtrack.label).attr({"class": "pl-chart-label"}),
+            var lTop, lBottom;
+            if (qtrack.displayScale) {
+                lTop = paper.text(.1, 8, max).attr({"class": "pl-chart-scalelbl"});
+                lBottom = paper.text(.1, height, "" + min).attr({"class": "pl-chart-scalelbl"});
+            }
+
+            var label = paper.text(.1, 0, qtrack.label).attr({"class": "pl-chart-label"}),
                 topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
                 cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
                 g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
+
+            if (qtrack.displayScale) {
+                g.add(lTop, lBottom);
+                this.textSet.push(lTop, lBottom);
+            }
             propsToDataStars(qtrack, g);
             /**** Try out for draggable elements*/
             g.dragVertical();
@@ -1285,12 +1296,14 @@ var Protael = (function () {
             this.viewSet.push(cLine);
             this.viewSet.push(chart2);
             this.textSet.push(label);
+            this.addOutsideLabel(label);
+
             return g;
         };
         paperproto.proteinMarkers = function (markers, topY) {
             var markerGp = this.paper.g().attr({
                 id: "gMarkers",
-                class:"pl-marker"
+                class: "pl-marker"
             }),
                 i,
                 m,
@@ -1437,16 +1450,7 @@ var Protael = (function () {
                     showOLbls, true);
             }
             this.aliTop = topY;
-            /*
 
-             if (protein.seqcolors) {
-             var data = Utils.splitData(protein.seqcolors.data.toUpperCase()),
-             c = chars.length;
-             for (c = chars.length; c -= 1;) {
-             scolors[c] = protein.seqcolors.colors[data[c]];
-             }
-             }
-             */
             this.proteinSequence(chars, topY, true);
             this.proteinSeqBG(chars, scolors, topY, true, "main");
             // /////////////////
@@ -1556,6 +1560,16 @@ var Protael = (function () {
                 fill: "white"
             });
             this.seqLineCovers.toFront();
+
+//            this.outsideLabelsSet.forEach(function (l) {
+//                l.attr({"text-anchor": "end"});
+//            });
+//            var vb = this.paper.attr("viewBox");
+//            vb.x = -5 - this.outsideLabelsSet.width;
+//            this.paper.attr({
+//                viewBox: vb
+//            });
+
             var self = this,
                 parent = this.protael,
                 // and we need a rect for catching mouse event for the whole chart area
@@ -1569,16 +1583,19 @@ var Protael = (function () {
             this.gLabels.add(residueBg, residueLabel);
 
             var dragStart = function (x, y, e) {
+
                 parent.clearSelection();
-                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1;
-                //  console.log("start: " + xx + "(" + x + ")");
+                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1 ;
+//                console.log("start: " + xx + "(" + x + ")" + self.outsideLabelsSet.width);
+//
+//                console.log (x +" :  "+ elBlanket.offset().left +" : " + vb.x+ " : "+xx);
                 parent.setSelection(xx, xx);
             };
             var dragMove = function (dx, dy, x, y, event) {
                 var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
                     ox = parent.toOriginalX(x - elBlanket.offset().left) + 1,
                     max = Math.max(sx, ox), min = Math.min(sx, ox);
-                //console.log("move: " + min + ";" + max);
+             //   console.log("move: " + min + ";" + max);
                 parent.setSelection(min, max);
             };
             var dragEnd = function (event) {
@@ -1599,19 +1616,11 @@ var Protael = (function () {
             });
             paper.mousemove(function (e) {
                 onMouseMove(e);
-            })
-                //.mouseout(function () { // this causes cursor to dissappear in FF at some locations
-//                self.pointer.attr({
-//                    'x': -5
-//                })
-                // self.gLabels.hide();
-                // self.pointer.hide();
-                // })
-                ;
+            });
 
             this.viewSet.push(r);
-//            this.gView = paper.g(this.gAxes, this.gSequences, this.gFTracks, this.gQTracks, this.seqLines,this.seqLineCovers, this.seqBGSet, this.seqChars,  this.seqLabelsSet, this.selector, this.pointer, this.gLabels).attr({id: "mainView"})
-//            .transform("translate(0, 10)");
+
+
         };
         /**
          * Returns content of the paper as SVG string
