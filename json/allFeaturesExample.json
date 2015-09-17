@@ -47,7 +47,7 @@
       "CS": "ALI",
       "label": "",
       "sequence": "MSGTLLAFDFGTKSIGVAVGQRITGTARPLPAIKAQ-DGTPDWNIIERLLKEWQPDEIIVGLPL",
-      "description": "3.000e-13 \u003e1nmn_A 138aa 01/10/03 (X-RAY) Hypothetical protein yqgF [ESCHERICHIA COLI] :_: Frame:0 Round:0 Length:138",
+      "description": "1nmn_A ",
       "start": 7,
       "seqcolors": {
         "data": "X  EEEEEE  SSEEEEEEEETTTTEEEEEEEEE B-TTB  HHHHHHHHHHH  SEEEEEEEB TTS B TTHHHHHHHHHHHHHHH   EEEEEE     XXXXXXXXXXXXXXXXX  GGGHHHHHHHHHHHHTT ",
@@ -84,6 +84,7 @@
     {
       "label": "Disorder",
       "color": "orange",
+      "displayScale": true,
       "values": [
         0.803,
         0.425,
@@ -160,6 +161,7 @@
     {
       "label": "Coil",
       "color": "#000",
+      "displayScale": true,
       "values": [
         0.987,
         0.818,
