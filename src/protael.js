@@ -460,8 +460,8 @@ var Protael = (function () {
         });
         this.viewSet = Snap.set(); // contains all objects for scaling
         this.textSet = Snap.set(); // contains all text elements of the canvas
-        this.outsideLabelsSet = Snap.set(); //contains all labels which has to be outside
-        this.outsideLabelsSet.width = 0;
+//        this.outsideLabelsSet = Snap.set(); //contains all labels which has to be outside
+//        this.outsideLabelsSet.width = 0;
         this.textSet.push(this.pLink);
         this.overlayFtLabels = Snap.set(); // contains labels for overlay features (for
         // switching views on zoomin/out)
@@ -654,12 +654,12 @@ var Protael = (function () {
             return this.gAxes;
         };
 
-        paperproto.addOutsideLabel = function (labelEl) {
-            this.outsideLabelsSet.push(labelEl);
-            var bb = labelEl.getBBox();
-            this.outsideLabelsSet.width = this.outsideLabelsSet.width > bb.width ?
-                this.outsideLabelsSet.width : bb.width;
-        };
+//        paperproto.addOutsideLabel = function (labelEl) {
+//            this.outsideLabelsSet.push(labelEl);
+//            var bb = labelEl.getBBox();
+//            this.outsideLabelsSet.width = this.outsideLabelsSet.width > bb.width ?
+//                this.outsideLabelsSet.width : bb.width;
+//        };
 
         paperproto.createDefs = function () {
             var p = this.paper,
@@ -825,7 +825,7 @@ var Protael = (function () {
             if (label) {
                 var mxL = 25, lblText = this.paper.text(1, y, label.substr(0, mxL));
                 self.seqLabelsSet.add(lblText);
-                this.addOutsideLabel(lblText);
+//                this.addOutsideLabel(lblText);
             }
             if (showSequence) {
                 // TODO: hmmm.... i have a bad feeling about this. will it use only main seq?
@@ -1030,7 +1030,7 @@ var Protael = (function () {
             if (!isOverlay) {
                 var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
                 g.append(label);
-                this.addOutsideLabel(label);
+//                this.addOutsideLabel(label);
             }
             g.transform("translate(0, " + topY + ")");
             g.dragVertical();
@@ -1155,8 +1155,8 @@ var Protael = (function () {
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
-                max = Math.max.apply(Math, vv),
-                min = Math.min.apply(Math, vv),
+                max = qtrack.displayMax ? qtrack.displayMax : Math.max.apply(Math, vv),
+                min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(Math, vv),
                 zero = (-min) / (max - min) * 100,
                 path = '',
                 ky = height / (max - min),
@@ -1296,7 +1296,7 @@ var Protael = (function () {
             this.viewSet.push(cLine);
             this.viewSet.push(chart2);
             this.textSet.push(label);
-            this.addOutsideLabel(label);
+//            this.addOutsideLabel(label);
 
             return g;
         };
@@ -1585,7 +1585,7 @@ var Protael = (function () {
             var dragStart = function (x, y, e) {
 
                 parent.clearSelection();
-                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1 ;
+                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1;
 //                console.log("start: " + xx + "(" + x + ")" + self.outsideLabelsSet.width);
 //
 //                console.log (x +" :  "+ elBlanket.offset().left +" : " + vb.x+ " : "+xx);
@@ -1595,7 +1595,7 @@ var Protael = (function () {
                 var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
                     ox = parent.toOriginalX(x - elBlanket.offset().left) + 1,
                     max = Math.max(sx, ox), min = Math.min(sx, ox);
-             //   console.log("move: " + min + ";" + max);
+                //   console.log("move: " + min + ";" + max);
                 parent.setSelection(min, max);
             };
             var dragEnd = function (event) {
