@@ -1703,6 +1703,8 @@ var Protael = (function () {
         protaelproto.setSelection = function (minx, maxx) {
 //            var minx = Math.min(min, max);
 //            var maxx = Math.max(min, max);
+            minx = Math.max(0, minx);
+            maxx = Math.min(this.protein.sequence.length, maxx);
             this.selectedx[0] = minx;
             this.selectedx[1] = maxx;
             var wd = this.toScreenX(maxx) - this.toScreenX(minx - 1);
@@ -1790,11 +1792,21 @@ var Protael = (function () {
                 if (this.protein.alignments) {
                     var l;
                     for (var i = 0; i < this.protein.alignments.length; i++) {
-                        var a = this.protein.alignments[i], sh = a.start - 1;
+                        var a = this.protein.alignments[i],
+                            //   sh = a.start - 1,
+                            t = "";
                         l = a.label || a.description || a.id || "seq " + (i + 1);
+
+                        if (a.start > 0) {
+                            t = lineOfChars(a.start - 1, ".");
+                        }
+                        t = t + a.sequence;
+                        if (t.length < this.selectedx[1]) {
+                            t += lineOfChars(this.selectedx[1] - t.length, ".");
+                        }
                         text += "\n>" + l + "\n" +
-                            a.sequence.substring(this.selectedx[0] - 1 - sh,
-                                this.selectedx[1] - sh);
+                            t.substring(this.selectedx[0] - 1,
+                                this.selectedx[1]);
                     }
                 }
                 if (this.protein.qtracks) {
@@ -1809,6 +1821,23 @@ var Protael = (function () {
             }
             return text;
         };
+        /**
+         * Create string filled with the same char
+         * @param {type} length
+         * @param {type} char
+         * @returns {undefined}
+         */
+        function lineOfChars(length, char) {
+            if (length === 0)
+                return "";
+            var l2 = length / 2;
+            var result = char;
+
+            while (result.length <= l2) {
+                result += result;
+            }
+            return result + result.substring(0, length - result.length);
+        }
         protaelproto.toOriginalX = function (x) {
             var y = Math.round((x + this.currShift) / this.currScale);
             // console.log("toOrig (" + x + ") = Math.round((" + x + " + " + this.currShift + ") / " + this.currScale + ")=" + y);
