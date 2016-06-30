@@ -94,7 +94,7 @@ var Protael = (function () {
      * Current version
      * @type {string}
      */
-    Protael.version = "0.1.0";
+    Protael.version = "1.1.0";
     Protael.link = "http://proteins.burnham.org:8080/Protael/";
     Protael.linkText = "ProtaelJS";
     var iniWidth, //initial requested width
@@ -839,8 +839,7 @@ var Protael = (function () {
                     });
                     this.textSet.push(this.strechSeq);
                     this.seqChars.add(this.strechSeq);
-                }
-                else {
+                } else {
                     setTimeout(function () {
                         if (showSequence) {
                             var allchars = [], c, x, chr;
@@ -978,8 +977,7 @@ var Protael = (function () {
                         propsToDataStars(ft, featureGroup);
                     }
                 }
-            }
-            else {
+            } else {
                 ftrack.features.sort(function (a, b) {
                     return a.start - b.start;
                 });
@@ -1169,7 +1167,9 @@ var Protael = (function () {
                 type = qtrack.type || areaspline,
                 X, Y, W = this.protael.W,
                 paper = this.paper,
-                chart2;
+                chart2,
+                self = this,
+                parent = this.protael;
             // pad values aray with 0
             for (i = vv.length; i <= width; i++) {
                 vv[i] = 0;
@@ -1182,8 +1182,7 @@ var Protael = (function () {
                     if (c[1] !== '') {
                         fill = paper.gradient("l(0, 1, 0, 0)" + c[0] + ':10-' + c[1] + ':90');
                     }
-                }
-                else if (c.length === 3) {
+                } else if (c.length === 3) {
                     if (c[1] === '') {
                         fill = c[0];
                     } else if (c[2] === '') {
@@ -1277,11 +1276,13 @@ var Protael = (function () {
                 lBottom = paper.text(.1, height, "" + min).attr({"class": "pl-chart-scalelbl"});
             }
 
-            var label = paper.text(.1, 0, qtrack.label).attr({"class": "pl-chart-label"}),
+            var bgrect = paper.rect(0, 0, W, height).attr({"opacity": .0}),
+                tooltip = paper.text(.1, 0, max).attr({"class": "pl-chart-tooltip"}).hide(),
+                label = paper.text(.1, 0, qtrack.label).attr({"class": "pl-chart-label"}),
                 topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
                 cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
-                g = paper.g(chart2, topLine, bottomLine, cLine, label).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
+                g = paper.g(chart2, topLine, bottomLine, cLine, label, tooltip, bgrect).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
 
             if (qtrack.displayScale) {
                 g.add(lTop, lBottom);
@@ -1290,12 +1291,34 @@ var Protael = (function () {
             propsToDataStars(qtrack, g);
             /**** Try out for draggable elements*/
             g.dragVertical();
+
+            g.attr({"title": qtrack.label});
+
+            g.mousemove(function (e) {
+                var x = $("#" + parent.container + ' #pointer').first().attr("x"),
+                    ox = parent.toOriginalX(x),
+                    bb = tooltip.getBBox();
+                if (bb.x2 > bgrect.getBBox().width / 2) {
+                    tooltip.attr({"text-anchor": "end"});
+                } else {
+                    tooltip.attr({"text-anchor": "start"});
+                }
+                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + vv[ox]});
+            });
+            g.mouseout(function (e) {
+                tooltip.hide();
+            });
+            g.mouseover(function (e) {
+                tooltip.show();
+            });
             this.gQTracks.add(g);
+            this.viewSet.push(bgrect);
             this.viewSet.push(topLine);
             this.viewSet.push(bottomLine);
             this.viewSet.push(cLine);
             this.viewSet.push(chart2);
             this.textSet.push(label);
+            this.textSet.push(tooltip);
 //            this.addOutsideLabel(label);
 
             return g;
@@ -1434,8 +1457,7 @@ var Protael = (function () {
                 drawingTop = 20,
                 paper = this.paper,
                 i, counterMax,
-                allowOver, delta,
-                qtrackLbls = [], qtrackBgs = [];
+                allowOver, delta;
             if (protein.markers) {
                 this.proteinMarkers(protein.markers, drawingTop);
             }
@@ -1489,19 +1511,6 @@ var Protael = (function () {
             for (i = 0; i < counterMax; i++) {
                 if (protein.qtracks[i].values && protein.qtracks[i].values.length) {
                     this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
-                    // add tooltip
-                    var r = paper.rect(0, 16 + topY, 22, 20, 4, 4).attr({
-                        fill: "#000",
-                        stroke: "black",
-                        color: "white",
-                        "stroke-width": "2px",
-                        opacity: ".7"
-                    }), l = paper.text(0, 30 + topY, '').attr({
-                        fill: "white"
-                    });
-                    this.gLabels.add(r, l);
-                    qtrackLbls[i] = l;
-                    qtrackBgs[i] = r;
                     protein.qtracks[i].topY = topY;
                     topY += uiOptions.graphHeight + uiOptions.space;
                 } else {
@@ -1561,14 +1570,6 @@ var Protael = (function () {
             });
             this.seqLineCovers.toFront();
 
-//            this.outsideLabelsSet.forEach(function (l) {
-//                l.attr({"text-anchor": "end"});
-//            });
-//            var vb = this.paper.attr("viewBox");
-//            vb.x = -5 - this.outsideLabelsSet.width;
-//            this.paper.attr({
-//                viewBox: vb
-//            });
 
             var self = this,
                 parent = this.protael,
@@ -1701,9 +1702,7 @@ var Protael = (function () {
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
-//            var minx = Math.min(min, max);
-//            var maxx = Math.max(min, max);
-            minx = Math.max(0, minx);
+            minx = Math.max(1, minx);
             maxx = Math.min(this.protein.sequence.length, maxx);
             this.selectedx[0] = minx;
             this.selectedx[1] = maxx;
@@ -1735,9 +1734,6 @@ var Protael = (function () {
             if (center > this.W) {
                 center = this.W / 2;
             }
-//            if (this.controlsEnabled) {
-//                this.selectSlider.slider("values", [center - 1, center + 2]);
-//            }
             return this;
         };
         protaelproto.translate = function (dx) {
@@ -1846,12 +1842,7 @@ var Protael = (function () {
         protaelproto.toScreenX = function (x) {
             return Math.round(x * this.currScale - this.currShift);
         };
-//        protaelproto.setShowCursorTooltips = function (val) {
-//            if (!val)
-//                this.paper.gLabels.hide();
-//            this.showCursorTooltips = val;
-//            return this;
-//        };
+
         protaelproto.setZoom = function (zoom) {
             zoom = Math.min(zoom, 15);
             zoom = Math.max(zoom, 0.5);
@@ -1894,7 +1885,6 @@ var Protael = (function () {
                 style = "<style type='text/css'><![CDATA[\n" + styles(div) + "\n]]></style>",
                 svg = prefix + ' ' + subsvg.substring(4, subsvg.length - 6) + style + '</svg>',
                 blob = new Blob([svg], {type: "image/svg+xml"});
-            console.log(style);
             // from FileSaver.js
             saveAs(blob, "protael_export.svg");
         };
@@ -1970,7 +1960,7 @@ var Protael = (function () {
         protaelproto.initTooltips = function () {
             if (!this.tooltipCallback)
                 this.tooltip(null);
-            $(document).tooltip({
+            $("#" + this.container).tooltip({
                 track: true,
                 content: this.tooltipCallback
             });
