@@ -423,7 +423,7 @@ var Protael = (function () {
         this.H = Utils.calcHeight(this.protein);
         this.W = this.protein.sequence.length;
         this.paper.setSize(this.W, this.H);
-        this.paper.axis(this.W, 10).toBack();
+//        this.paper.axis(this.W, 10).toBack();
         newDiv.resizable({
             stop: function (ev, ui) {
                 self.zoomToFit();
@@ -1534,6 +1534,8 @@ var Protael = (function () {
                     }
                 }
             }
+            this.protael.H = topY + 5;
+            this.axis(this.protael.W, 10).toBack();
 
             this.gSequences.add(this.seqLabelsSet, this.seqBGSet, this.seqChars, this.seqLines);
             this.labelsWidth = this.seqLabelsSet.getBBox().width;
@@ -1541,6 +1543,11 @@ var Protael = (function () {
             this.gSequences.toFront();
             this.seqLines.toBack();
             this.gAxes.toBack();
+
+            this.paper.attr({'height': this.protael.H});
+            this.pLink.attr({
+                y:this.protael.H
+            });
             // rect to show current position
             this.selector = paper.rect(-1, 0, 0, this.protael.H).attr({
                 fill: '#DDD',
@@ -1620,8 +1627,6 @@ var Protael = (function () {
             });
 
             this.viewSet.push(r);
-
-
         };
         /**
          * Returns content of the paper as SVG string
