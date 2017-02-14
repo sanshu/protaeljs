@@ -353,6 +353,11 @@
             "type": "stick",
             "x": 40,
             "color": "#fc0"
+        },{
+            "type": "pin",
+            "x": 45,
+            "label": "pin",
+            "color": "#1240ab"
         }
     ],
     "bridges": [{
