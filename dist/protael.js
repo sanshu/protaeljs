@@ -682,6 +682,10 @@ var Protael = (function () {
                 id: "stick",
                 "stroke-width": 2
             }).toDefs();
+            p.g(p.line(0, 0, 0, 12), p.circle(0, 2, 2.5)).attr({
+                id: "pin",
+                "stroke-width": 2
+            }).toDefs();
             thegap.add(p.line(0, dy, 0, y - dy));
             thegap.add(p.line(-dx, 0, 0, dy));
             thegap.add(p.line(dx, 0, 0, dy));
@@ -1624,6 +1628,7 @@ var Protael = (function () {
             });
             paper.mousemove(function (e) {
                 onMouseMove(e);
+                self.protael.userMouseMove(e);
             });
 
             this.viewSet.push(r);
@@ -1704,6 +1709,7 @@ var Protael = (function () {
             this.clearSelection();
             this.initTooltips();
             this.initClicks();
+            this.onMouseOver(null);
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
@@ -1855,6 +1861,12 @@ var Protael = (function () {
             $("#" + this.container + ' .protael_zoomslider').slider("value", this.currScale);
             return this;
         };
+
+        protaelproto.onMouseOver = function(callback){
+            if (callback && typeof (callback) == "function") {
+                this.userMouseMove = callback;
+            }
+        }
         /**
          * Change current coloring schema
          * @param {type} CS
@@ -1970,7 +1982,6 @@ var Protael = (function () {
                 content: this.tooltipCallback
             });
         };
-
 
         protaelproto.initClicks = function () {
             $("[data-x]").click(function () {
