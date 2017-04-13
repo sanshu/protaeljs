@@ -49,6 +49,10 @@
                             //.tooltip(function(){return 'aaa';})
                             .draw().setColoringScheme("Clustal");
                         localStorage.testJson = t;
+                        
+                        P.onMouseOver(function(e){
+                            console.log(P.toOriginalX(e.offsetX));
+                        });
                     } catch (err) {
                         console.log(err);
                         $("#errorMsg").html("Unable to display protein: " + err.message);

@@ -1628,6 +1628,7 @@ var Protael = (function () {
             });
             paper.mousemove(function (e) {
                 onMouseMove(e);
+                self.protael.userMouseMove(e);
             });
 
             this.viewSet.push(r);
@@ -1708,6 +1709,7 @@ var Protael = (function () {
             this.clearSelection();
             this.initTooltips();
             this.initClicks();
+            this.onMouseOver(null);
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
@@ -1859,6 +1861,12 @@ var Protael = (function () {
             $("#" + this.container + ' .protael_zoomslider').slider("value", this.currScale);
             return this;
         };
+
+        protaelproto.onMouseOver = function(callback){
+            if (callback && typeof (callback) == "function") {
+                this.userMouseMove = callback;
+            }
+        }
         /**
          * Change current coloring schema
          * @param {type} CS
@@ -1974,7 +1982,6 @@ var Protael = (function () {
                 content: this.tooltipCallback
             });
         };
-
 
         protaelproto.initClicks = function () {
             $("[data-x]").click(function () {

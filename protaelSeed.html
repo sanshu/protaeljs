@@ -29,7 +29,11 @@
                     var protein = {sequence: 'this_is_template_sequence'};
 
                     try {
-                        Protael(protein, "protaelHolder", true).draw();
+                        P  = Protael(protein, "protaelHolder", true).draw();
+                        // you can add custom mouseOver function here:
+                        P.onMouseOver(function(e){
+                            console.log(P.toOriginalX(e.offsetX));
+                        });
                     } catch (err) {
                         console.log(err);
                     }
