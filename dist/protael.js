@@ -1161,7 +1161,7 @@ var Protael = (function () {
                 min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(Math, vv),
                 zero = (-min) / (max - min) * 100,
                 path = '',
-                ky = height / (max - min),
+                ky = (max === min) ? 0: height / (max - min),
                 // different chart types
                 spline = "spline",
                 column = "column",
