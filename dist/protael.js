@@ -105,157 +105,157 @@ var Protael = (function () {
             graphSpacing: 20,
             space: 20
         },
-    /**
-     * Object to keep coloring schemas
-     * @memberOf Protael
-     */
-    ColoringSchemes = (function () {
-        // see http://www.bioinformatics.nl/~berndb/aacolour.html
-        var o = "orange",
-            r = "red",
-            b = "blue",
-            g = "green",
-            m = 'magenta',
-            e = 'grey',
-            schema = {
-                'clustal': {
-                    "G": o,
-                    "P": o,
-                    "S": o,
-                    "T": o,
-                    'H': r,
-                    'K': r,
-                    'R': r,
-                    'F': b,
-                    'W': b,
-                    'Y': b,
-                    'I': g,
-                    'L': g,
-                    'M': g,
-                    'V': g
-                },
-                'lesk': {
-                    // Small nonpolar
-                    'G': o,
-                    'A': o,
-                    'S': o,
-                    'T': o,
-                    // Hydrophobic
-                    'C': g,
-                    'V': g,
-                    'I': g,
-                    'L': g,
-                    'P': g,
-                    'F': g,
-                    'Y': g,
-                    'M': g,
-                    'W': g,
-                    // Polar
-                    'N': m,
-                    'Q': m,
-                    'H': m,
-                    // Negatively charged
-                    'D': r,
-                    'E': r,
-                    // Positively charged
-                    'K': b,
-                    'R': b
-                },
-                'maeditor': {
-                    'A': 'lightgreen',
-                    'G': 'lightgreen',
-                    'C': g,
-                    'D': 'DarkGreen',
-                    'E': 'DarkGreen ',
-                    'N': 'DarkGreen ',
-                    'Q': 'DarkGreen ',
-                    'I': b,
-                    'L': b,
-                    'M': b,
-                    'V': b,
-                    'F': '#C8A2C8',
-                    'W': '#C8A2C8',
-                    'Y': '#C8A2C8', // lilac
-                    'H': 'DarkBlue ',
-                    'K': o,
-                    'R': o,
-                    'P': 'pink',
-                    'S': r,
-                    'T': r
-                },
-                'cinema': {
-                    // Polar positive
-                    'H': b,
-                    'K': b,
-                    'R': b,
-                    // Polar negative
-                    'D': r,
-                    'E': r,
-                    // Polar neutral
-                    'S': g,
-                    'T': g,
-                    'N': g,
-                    'Q': g,
-                    // Non - polar aliphatic.
-                    // White is the default color, so don't need this
+        /**
+         * Object to keep coloring schemas
+         * @memberOf Protael
+         */
+        ColoringSchemes = (function () {
+            // see http://www.bioinformatics.nl/~berndb/aacolour.html
+            var o = "orange",
+                r = "red",
+                b = "blue",
+                g = "green",
+                m = 'magenta',
+                e = 'grey',
+                schema = {
+                    'clustal': {
+                        "G": o,
+                        "P": o,
+                        "S": o,
+                        "T": o,
+                        'H': r,
+                        'K': r,
+                        'R': r,
+                        'F': b,
+                        'W': b,
+                        'Y': b,
+                        'I': g,
+                        'L': g,
+                        'M': g,
+                        'V': g
+                    },
+                    'lesk': {
+                        // Small nonpolar
+                        'G': o,
+                        'A': o,
+                        'S': o,
+                        'T': o,
+                        // Hydrophobic
+                        'C': g,
+                        'V': g,
+                        'I': g,
+                        'L': g,
+                        'P': g,
+                        'F': g,
+                        'Y': g,
+                        'M': g,
+                        'W': g,
+                        // Polar
+                        'N': m,
+                        'Q': m,
+                        'H': m,
+                        // Negatively charged
+                        'D': r,
+                        'E': r,
+                        // Positively charged
+                        'K': b,
+                        'R': b
+                    },
+                    'maeditor': {
+                        'A': 'lightgreen',
+                        'G': 'lightgreen',
+                        'C': g,
+                        'D': 'DarkGreen',
+                        'E': 'DarkGreen ',
+                        'N': 'DarkGreen ',
+                        'Q': 'DarkGreen ',
+                        'I': b,
+                        'L': b,
+                        'M': b,
+                        'V': b,
+                        'F': '#C8A2C8',
+                        'W': '#C8A2C8',
+                        'Y': '#C8A2C8', // lilac
+                        'H': 'DarkBlue ',
+                        'K': o,
+                        'R': o,
+                        'P': 'pink',
+                        'S': r,
+                        'T': r
+                    },
+                    'cinema': {
+                        // Polar positive
+                        'H': b,
+                        'K': b,
+                        'R': b,
+                        // Polar negative
+                        'D': r,
+                        'E': r,
+                        // Polar neutral
+                        'S': g,
+                        'T': g,
+                        'N': g,
+                        'Q': g,
+                        // Non - polar aliphatic.
+                        // White is the default color, so don't need this
 //                'A': 'white',
 //                'V': 'white',
 //                'L': 'white',
 //                'I': 'white',
 //                'M': 'white',
-                    // Non - polar aromatic
-                    'F': m,
-                    'W': m,
-                    'Y': m,
-                    'P': 'brown',
-                    'G': 'brown',
-                    'C': 'yellow',
-                    // Special characters
-                    'B': e,
-                    'Z': e,
-                    'X': e
-                },
-                'ali': {
-                    'A': e,
-                    'R': e,
-                    'N': e,
-                    'D': e,
-                    'C': e,
-                    'E': e,
-                    'Q': e,
-                    'G': e,
-                    'H': e,
-                    'I': e,
-                    'L': e,
-                    'K': e,
-                    'M': e,
-                    'F': e,
-                    'P': e,
-                    'S': e,
-                    'T': e,
-                    'W': e,
-                    'Y': e,
-                    'V': e
-                }
-            };
-        /**
-         * Gets Coloring by name, or Clustal CS
-         * @param {type} schemaName
-         * @returns {schema.clustal|_L32.schema.clustal|schema|_L32.schema}
-         */
-        function getCSchema(schemaName) {
-            schemaName = schemaName.toLowerCase();
-            return schema[schemaName] || schema.clustal;
-        }
-        ;
+                        // Non - polar aromatic
+                        'F': m,
+                        'W': m,
+                        'Y': m,
+                        'P': 'brown',
+                        'G': 'brown',
+                        'C': 'yellow',
+                        // Special characters
+                        'B': e,
+                        'Z': e,
+                        'X': e
+                    },
+                    'ali': {
+                        'A': e,
+                        'R': e,
+                        'N': e,
+                        'D': e,
+                        'C': e,
+                        'E': e,
+                        'Q': e,
+                        'G': e,
+                        'H': e,
+                        'I': e,
+                        'L': e,
+                        'K': e,
+                        'M': e,
+                        'F': e,
+                        'P': e,
+                        'S': e,
+                        'T': e,
+                        'W': e,
+                        'Y': e,
+                        'V': e
+                    }
+                };
+            /**
+             * Gets Coloring by name, or Clustal CS
+             * @param {type} schemaName
+             * @returns {schema.clustal|_L32.schema.clustal|schema|_L32.schema}
+             */
+            function getCSchema(schemaName) {
+                schemaName = schemaName.toLowerCase();
+                return schema[schemaName] || schema.clustal;
+            }
+            ;
 
-        function addCSchema(schemaName, schemas) {
-            schema[schemaName] = schemas;
-        }
-        ;
+            function addCSchema(schemaName, schemas) {
+                schema[schemaName] = schemas;
+            }
+            ;
 
-        return {getCSchema: getCSchema, addCSchema: addCSchema};
-    }());
+            return {getCSchema: getCSchema, addCSchema: addCSchema};
+        }());
     /**
      * Create toolbar.
      * @private
@@ -1385,7 +1385,7 @@ var Protael = (function () {
                 bridgeH = 12,
                 b, gb,
                 att = {}, att2 = {fill: "white", stroke: "white"},
-            s, e, c, ls, le,
+                s, e, c, ls, le,
                 lc1, t, lc2;
 //TODO: micro-opt
             for (var i in bridges) {
@@ -1550,7 +1550,7 @@ var Protael = (function () {
 
             this.paper.attr({'height': this.protael.H});
             this.pLink.attr({
-                y:this.protael.H
+                y: this.protael.H
             });
             // rect to show current position
             this.selector = paper.rect(-1, 0, 0, this.protael.H).attr({
@@ -1862,9 +1862,11 @@ var Protael = (function () {
             return this;
         };
 
-        protaelproto.onMouseOver = function(callback){
+        protaelproto.onMouseOver = function (callback) {
             if (callback && typeof (callback) == "function") {
                 this.userMouseMove = callback;
+            } else {
+                this.userMouseMove = function () {};
             }
         }
         /**
