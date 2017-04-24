@@ -738,7 +738,7 @@ var Protael = (function () {
         };
         paperproto.setWidth = function (width) {
             var ww, vb = this.paper.attr("viewBox");
-            vb.width = width + 20;
+            vb.width = ''.concat(width + 20).concat('px');
             ww = ''.concat(width).concat('px');
             this.paper.attr({
                 "width": ww,
@@ -1618,9 +1618,9 @@ var Protael = (function () {
             var onMouseMove = function (e) {
                 //  console.log("x = e.pageX(" + e.pageX + ") - elBlanket.offset().left(" + elBlanket.offset().left + ") = " + (e.pageX - elBlanket.offset().left));
 
-                //adding 5 to shift it a bit from the mouse
+                //adding 2 to shift it a bit from the mouse
                 self.pointer.attr({
-                    'x': e.pageX - elBlanket.offset().left + 5
+                    'x': e.pageX - elBlanket.offset().left + 2
                 });
             };
             self.pointer.mousemove(function (e) {
