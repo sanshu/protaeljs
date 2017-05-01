@@ -415,7 +415,11 @@ var Protael = (function () {
         // need this flag to implement "strechable" sequence
         this.isChrome = (browser.indexOf('Chrome') >= 0 || browser
             .indexOf('Opera') >= 0);
-        console.log("Can use stretchable seq: " + this.isChrome);
+        // need this for safari mask+gradient workaround
+        this.isSafari = /constructor/i.test(window.HTMLElement) || (function (p) {
+            return p.toString() === "[object SafariRemoteNotification]";
+        })(!window['safari'] || safari.pushNotification);
+//        console.log("Can use stretchable seq: " + this.isChrome);
         this.currScale = 1;
         this.currShift = 0;
         this.showCursorTooltips = true;
@@ -1161,7 +1165,7 @@ var Protael = (function () {
                 min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(Math, vv),
                 zero = (-min) / (max - min) * 100,
                 path = '',
-                ky = (max === min) ? 0: height / (max - min),
+                ky = (max === min) ? 0 : height / (max - min),
                 // different chart types
                 spline = "spline",
                 column = "column",
@@ -1172,7 +1176,6 @@ var Protael = (function () {
                 X, Y, W = this.protael.W,
                 paper = this.paper,
                 chart2,
-                self = this,
                 parent = this.protael;
             // pad values aray with 0
             for (i = vv.length; i <= width; i++) {
@@ -1265,11 +1268,22 @@ var Protael = (function () {
                     this.viewSet.push(r);
                     rects.add(r);
                 }
-                chart2 = paper.rect(0, 0, W, height).attr({
-                    stroke: fill,
-                    fill: fill,
-                    mask: rects
-                });
+
+                if (parent.isSafari) {
+                    console.log("Safari browser does not support chart type COLUMN with GRADIENT filling. Switching to single color");
+                    var fillsingle = Array.isArray(c) ? c[0] : c;
+                    chart2 = paper.rect(0, 0, W, height).attr({
+                        stroke: fillsingle,
+                        fill: fillsingle,
+                        mask: rects
+                    });
+                } else {
+                    chart2 = paper.rect(0, 0, W, height).attr({
+                        stroke: fill,
+                        fill: fill,
+                        mask: rects
+                    });
+                }
             } else {
                 console.log("Unknown chart type :" + type);
             }
