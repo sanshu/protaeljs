@@ -1068,7 +1068,7 @@ var Protael = (function () {
                 shape.attr({'class': feature.clazz});
             }
             shapeGr = paper.g().attr({
-                id: feature.label || '',
+                id: feature.id || '',
                 title: feature.label,
                 fill: color,
                 'class': clazz
