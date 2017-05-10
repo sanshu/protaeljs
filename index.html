@@ -17,7 +17,7 @@
         <link rel="stylesheet" href="css/protael.css"/>
         <script type="text/javascript" src="lib/snap.svg-min.js"></script>
         <script type="text/javascript" src="src/protael.js"></script>
-          <!--<script type="text/javascript" src="dist/protael.1.1.0.min.js"></script>-->
+        <!--<script type="text/javascript" src="dist/protael.1.1.0.min.js"></script>-->
         <script>
             $(document)
                 .ready(function () {
@@ -32,12 +32,14 @@
                         applyJSON();
 //                    }
                     });
-                    
-                 $('#savePNG').click(function(){
-                     saveSvgAsPng(document.getElementById("protaelHolder_svgcanvas"), "protael_export.png");
-                     
-                 });   
+
+                    $('#savePNG').click(function () {
+                        saveSvgAsPng(document.getElementById("protaelHolder_svgcanvas"), "protael_export.png");
+                    });
                 });
+
+           
+
             function applyJSON() {
                 $(".protael_resizable").remove();
                 $("#errorMsg").hide();
@@ -49,9 +51,10 @@
                             //.tooltip(function(){return 'aaa';})
                             .draw().setColoringScheme("Clustal");
                         localStorage.testJson = t;
-                        
-                        P.onMouseOver(function(e){
-                            console.log(P.toOriginalX(e.offsetX));
+
+                        P.onMouseOver(function (e) {
+                           
+                            console.log(P.toOriginalX(P.mouseToSvgXY(e).x));
                         });
                     } catch (err) {
                         console.log(err);
@@ -102,7 +105,7 @@
                 <div class="col-md-12">
                     <h3>Protael view</h3>
                     <div id ="protaelHolder"  style="width:100%; position:absolute; left:300px;"> </div>
-                    
+
                     <button id="savePNG">savePNG</button>
                 </div>
             </div>
@@ -126,5 +129,5 @@
         </script>
         <script type="text/javascript" async="" src="lib/FileSaver_Blob.js"></script>
         <script type="text/javascript" async="" src="lib/saveSvgAsPng.js"></script>
-        
+
     </body></html>

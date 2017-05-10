@@ -515,7 +515,6 @@ var Protael = (function () {
          */
         paperproto.setSize = function (w, h) {
             var p = this.paper, vb = p.attr("viewBox"),
-                // vbl = this.pLink.getBBox(),
                 hh = ''.concat(h).concat('px');
             vb.height = h;
             p.attr({
@@ -742,7 +741,7 @@ var Protael = (function () {
         };
         paperproto.setWidth = function (width) {
             var ww, vb = this.paper.attr("viewBox");
-            vb.width = ''.concat(width + 20).concat('px');
+            vb.width = ''.concat(width);// + 20).concat('px');
             ww = ''.concat(width).concat('px');
             this.paper.attr({
                 "width": ww,
@@ -1609,19 +1608,14 @@ var Protael = (function () {
             this.gLabels.add(residueBg, residueLabel);
 
             var dragStart = function (x, y, e) {
-
                 parent.clearSelection();
-                var xx = parent.toOriginalX(x - elBlanket.offset().left) + 1;
-//                console.log("start: " + xx + "(" + x + ")" + self.outsideLabelsSet.width);
-//
-//                console.log (x +" :  "+ elBlanket.offset().left +" : " + vb.x+ " : "+xx);
+                var xx = parent.toOriginalX(x - elBlanket.offset().left);
                 parent.setSelection(xx, xx);
             };
             var dragMove = function (dx, dy, x, y, event) {
                 var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
-                    ox = parent.toOriginalX(x - elBlanket.offset().left) + 1,
+                    ox = parent.toOriginalX(x - elBlanket.offset().left),
                     max = Math.max(sx, ox), min = Math.min(sx, ox);
-                //   console.log("move: " + min + ";" + max);
                 parent.setSelection(min, max);
             };
             var dragEnd = function (event) {
@@ -1860,7 +1854,7 @@ var Protael = (function () {
             return result + result.substring(0, length - result.length);
         }
         protaelproto.toOriginalX = function (x) {
-            var y = Math.round((x + this.currShift) / this.currScale);
+            var y = Math.round((x + this.currShift) / this.currScale + .5);
             // console.log("toOrig (" + x + ") = Math.round((" + x + " + " + this.currShift + ") / " + this.currScale + ")=" + y);
             return y;
         };
@@ -1882,7 +1876,24 @@ var Protael = (function () {
             } else {
                 this.userMouseMove = function () {};
             }
-        }
+        };
+
+        /**
+         *
+         * @param {type} event - mouse event
+         * @return {unresolved}  Point (x, y) in svg space
+         */
+        protaelproto.mouseToSvgXY = function (event) {
+            var t = event.target,
+                svg = document.getElementById(this.container + '_svgcanvas'),
+                pt = svg.createSVGPoint();
+
+            pt.x = event.clientX;
+            pt.y = event.clientY;
+
+            return pt.matrixTransform(t.getScreenCTM().inverse());
+        };
+
         /**
          * Change current coloring schema
          * @param {type} CS
