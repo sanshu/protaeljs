@@ -1609,12 +1609,12 @@ var Protael = (function () {
 
             var dragStart = function (x, y, e) {
                 parent.clearSelection();
-                var xx = parent.toOriginalX(x - elBlanket.offset().left);
+                var xx = parent.toOriginalX(parent.mouseToSvgXY(e).x);
                 parent.setSelection(xx, xx);
             };
-            var dragMove = function (dx, dy, x, y, event) {
+            var dragMove = function (dx, dy, x, y, e) {
                 var sx = dx > 0 ? parent.selectedx[0] : parent.selectedx[1],
-                    ox = parent.toOriginalX(x - elBlanket.offset().left),
+                    ox = parent.toOriginalX(parent.mouseToSvgXY(e).x),
                     max = Math.max(sx, ox), min = Math.min(sx, ox);
                 parent.setSelection(min, max);
             };
@@ -1624,11 +1624,9 @@ var Protael = (function () {
             paper.drag(dragMove, dragStart, dragEnd);
 
             var onMouseMove = function (e) {
-                //  console.log("x = e.pageX(" + e.pageX + ") - elBlanket.offset().left(" + elBlanket.offset().left + ") = " + (e.pageX - elBlanket.offset().left));
-
                 //adding 2 to shift it a bit from the mouse
                 self.pointer.attr({
-                    'x': e.pageX - elBlanket.offset().left + 2
+                    'x': parent.mouseToSvgXY(e).x +2
                 });
             };
             self.pointer.mousemove(function (e) {
