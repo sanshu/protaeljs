@@ -1153,15 +1153,64 @@ var Protael = (function () {
             return {p1: p1, p2: p2};
         }
 
+        function prepareQTValues(qtrack) {
+            var vv = Array.isArray(qtrack.values) ?
+                qtrack.values : Utils.splitData(qtrack.values);
+
+            var max = Math.max.apply(null, vv),
+                min = Math.min.apply(null, vv);
+
+
+            if (qtrack.transform) {
+
+                if (qtrack.transform === "log") {
+                    vv.forEach(function (e, i, a) {
+                        if (min < 0) {
+                            e += min;
+                        }
+                        a[i] = Math.log(e+0.00000000000001);
+                    });
+                } else if (qtrack.transform === "log2") {
+                    vv.forEach(function (e, i, a) {
+                        if (min < 0) {
+                            e += min;
+                        }
+                        a[i] = Math.log2(e+0.00000000000001);
+                    });
+                } else if (qtrack.transform === "log10") {
+                    vv.forEach(function (e, i, a) {
+                        if (min < 0) {
+                            e += min;
+                        }
+                        a[i] = Math.log10(e+0.00000000000001);
+                    });
+                } else if (qtrack.transform === "exp") {
+                    vv.forEach(function (e, i, a) {
+                        if (min < 0) {
+                            e += min;
+                        }
+                        a[i] = Math.exp(e+0.00000000000001);
+                    });
+                }
+            }
+
+            return vv;
+        }
+
+        function cutArray(vv, max, min) {
+            return vv;
+        }
+
+
+
         paperproto.quantTrack = function (qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var vv = Array.isArray(qtrack.values) ?
-                qtrack.values : Utils.splitData(qtrack.values),
+            var vv = prepareQTValues(qtrack),
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
-                max = qtrack.displayMax ? qtrack.displayMax : Math.max.apply(Math, vv),
-                min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(Math, vv),
+                max = qtrack.displayMax ? qtrack.displayMax : Math.max.apply(null, vv),
+                min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(null, vv),
                 zero = (-min) / (max - min) * 100,
                 path = '',
                 ky = (max === min) ? 0 : height / (max - min),
@@ -1626,7 +1675,7 @@ var Protael = (function () {
             var onMouseMove = function (e) {
                 //adding 2 to shift it a bit from the mouse
                 self.pointer.attr({
-                    'x': parent.mouseToSvgXY(e).x +2
+                    'x': parent.mouseToSvgXY(e).x + 2
                 });
             };
             self.pointer.mousemove(function (e) {
