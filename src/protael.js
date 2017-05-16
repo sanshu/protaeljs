@@ -1153,51 +1153,57 @@ var Protael = (function () {
             return {p1: p1, p2: p2};
         }
 
-        function prepareQTValues(qtrack) {
-            var vv = Array.isArray(qtrack.values) ?
-                qtrack.values : Utils.splitData(qtrack.values);
+        function prepareQTValues(data, qtrack) {
+            var vv = data;
 
-            var max = Math.max.apply(null, vv),
+            var
                 min = Math.min.apply(null, vv);
 
-
             if (qtrack.transform) {
-
+                var d = 0.00000000000001; // make sure there are no 0 values;
                 if (qtrack.transform === "log") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.log(e+0.00000000000001);
+                        a[i] = Math.log(e + d);
                     });
                 } else if (qtrack.transform === "log2") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.log2(e+0.00000000000001);
+                        a[i] = Math.log2(e + d);
                     });
                 } else if (qtrack.transform === "log10") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.log10(e+0.00000000000001);
+                        a[i] = Math.log10(e + d);
                     });
                 } else if (qtrack.transform === "exp") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.exp(e+0.00000000000001);
+                        a[i] = Math.exp(e + d);
                     });
                 }
             }
 
-            return vv;
-        }
+            // limit values to user-defined displayMax and Min
+            if (qtrack.displayMax) {
+                vv.forEach(function (e, i, a) {
+                    a[i] = Math.min(e, qtrack.displayMax);
+                });
+            }
+            if (qtrack.displayMin) {
+                vv.forEach(function (e, i, a) {
+                    a[i] = Math.max(e, min);
+                });
+            }
 
-        function cutArray(vv, max, min) {
             return vv;
         }
 
@@ -1205,7 +1211,10 @@ var Protael = (function () {
 
         paperproto.quantTrack = function (qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
-            var vv = prepareQTValues(qtrack),
+            // data will be used for
+            var data = Array.isArray(qtrack.values) ?
+                qtrack.values : Utils.splitData(qtrack.values),
+                vv = prepareQTValues(data.slice(), qtrack),
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
@@ -1369,7 +1378,7 @@ var Protael = (function () {
                 } else {
                     tooltip.attr({"text-anchor": "start"});
                 }
-                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + vv[ox]});
+                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + data[ox]});
             });
             g.mouseout(function (e) {
                 tooltip.hide();
