@@ -562,7 +562,7 @@ var Protael = (function () {
                             x1: x1 * ds,
                             x2: x2 * ds
                         });
-                    } else if (t.type === "path") {
+                    } else if (t.type === "path" || t.type === "polygon" || t.type === "polyline") {
                         t.transform("s" + zoom + " 1 0 0");
                     } else {
                     }
@@ -1207,8 +1207,6 @@ var Protael = (function () {
             return vv;
         }
 
-
-
         paperproto.quantTrack = function (qtrack, topY, width, height) {
             //    console.log("Drawing qtrack: " + qtrack.values);
             // data will be used for
@@ -1218,11 +1216,13 @@ var Protael = (function () {
                 i, j, jj,
                 c = qtrack.color || "#F00",
                 fill = c,
+                // this might seem redundant, since vv was trimmed to fit into boundaries,
+                // but is displayMax/Min are outside of values range we still need to scale the chart
                 max = qtrack.displayMax ? qtrack.displayMax : Math.max.apply(null, vv),
                 min = qtrack.displayMin ? qtrack.displayMin : Math.min.apply(null, vv),
-                zero = (-min) / (max - min) * 100,
+                zero = (max === min) ? 0 : (-min) / (max - min) * 100, // for gradient
+                ky = (max === min) ? 0 : height / (max - min), // for coords
                 path = '',
-                ky = (max === min) ? 0 : height / (max - min),
                 // different chart types
                 spline = "spline",
                 column = "column",
@@ -1302,53 +1302,30 @@ var Protael = (function () {
                         "stroke-width": ".1px"});
                 }
             } else if (qtrack.type === column) {
-                // column chart
-                var rects = paper.g().attr({
-                    stroke: fill,
-                    "fill": "orange",
-                    "class": "pl-chart-area",
-                    opacity: 1.0
-                });
                 var y0 = height + min * ky;
+                var points = [];
+                points.push(0, y0);
                 for (j = 0; j < W; j++) {
                     X = j;
-                    var dh = 0;
-                    if (vv[j] >= 0) {
-                        Y = (max - vv[j]) * ky;
-                        dh = vv[j] * ky;
-                    } else {
-                        Y = y0;
-                        dh = -vv[j] * ky;
-                    }
-
-                    var r = paper.rect(X, Y, 1, dh);
-                    this.viewSet.push(r);
-                    rects.add(r);
+                    Y = height - (vv[j] - min) * ky;
+                    points.push(X, Y, X + 1, Y);
                 }
+                points.push(W, y0);
+                chart2 = paper.polygon(points).attr({
+                    stroke: "none", // important!!!
+                    fill: fill,
+                    "class": "pl-chart-area"
+                });
 
-                if (parent.isSafari) {
-                    console.log("Safari browser does not support chart type COLUMN with GRADIENT filling. Switching to single color");
-                    var fillsingle = Array.isArray(c) ? c[0] : c;
-                    chart2 = paper.rect(0, 0, W, height).attr({
-                        stroke: fillsingle,
-                        fill: fillsingle,
-                        mask: rects
-                    });
-                } else {
-                    chart2 = paper.rect(0, 0, W, height).attr({
-                        stroke: fill,
-                        fill: fill,
-                        mask: rects
-                    });
-                }
+                this.viewSet.push(chart2);
             } else {
                 console.log("Unknown chart type :" + type);
             }
 
             var lTop, lBottom;
             if (qtrack.displayScale) {
-                lTop = paper.text(.1, 8, max).attr({"class": "pl-chart-scalelbl"});
-                lBottom = paper.text(.1, height, "" + min).attr({"class": "pl-chart-scalelbl"});
+                lTop = paper.text(.1, 8, max.toFixed(2)).attr({"class": "pl-chart-scalelbl"});
+                lBottom = paper.text(.1, height, min.toFixed(2)).attr({"class": "pl-chart-scalelbl"});
             }
 
             var bgrect = paper.rect(0, 0, W, height).attr({"opacity": .0}),
@@ -1372,13 +1349,18 @@ var Protael = (function () {
             g.mousemove(function (e) {
                 var x = $("#" + parent.container + ' #pointer').first().attr("x"),
                     ox = parent.toOriginalX(x),
-                    bb = tooltip.getBBox();
+                    bb = tooltip.getBBox(),
+                    txt = typeof data[ox - 1] !== "undefined" ? data[ox - 1] : "N/A";
+                if (qtrack.transform) {
+                    txt += ", " + qtrack.transform + "=";
+                    txt += typeof data[ox - 1] !== "undefined" ? vv[ox - 1].valueOf().toFixed(2) : "N/A";
+                }
                 if (bb.x2 > bgrect.getBBox().width / 2) {
                     tooltip.attr({"text-anchor": "end"});
                 } else {
                     tooltip.attr({"text-anchor": "start"});
                 }
-                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + data[ox]});
+                tooltip.attr({"x": x, "text": qtrack.label.substring(0, 1) + ".: " + txt});
             });
             g.mouseout(function (e) {
                 tooltip.hide();
