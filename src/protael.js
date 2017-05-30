@@ -1677,6 +1677,10 @@ var Protael = (function () {
                 self.protael.userMouseMove(e);
             });
 
+            paper.click(function(e){
+                self.protael.userMouseClick(e);
+            });
+
             this.viewSet.push(r);
         };
         /**
@@ -1756,6 +1760,7 @@ var Protael = (function () {
             this.initTooltips();
             this.initClicks();
             this.onMouseOver(null);
+            this.onClick(null);
             return this;
         };
         protaelproto.setSelection = function (minx, maxx) {
@@ -1909,10 +1914,18 @@ var Protael = (function () {
         };
 
         protaelproto.onMouseOver = function (callback) {
-            if (callback && typeof (callback) == "function") {
+            if (callback && typeof (callback) === "function") {
                 this.userMouseMove = callback;
             } else {
                 this.userMouseMove = function () {};
+            }
+        };
+
+        protaelproto.onClick = function (callback) {
+            if (callback && typeof (callback) === "function") {
+                this.userMouseClick = callback;
+            } else {
+                this.userMouseClick = function () {};
             }
         };
 
