@@ -1932,6 +1932,44 @@ var Protael = (function () {
             return pt.matrixTransform(t.getScreenCTM().inverse());
         };
 
+        protaelproto.addQTrack = function (track) {
+            var oldZoom = this.currentScale();
+            this.setZoom(1);
+
+            if (!this.protein.qtracks)
+                this.protein.qtracks = [];
+
+            this.protein.qtracks.push(track);
+            var topY = this.H - 5;
+            var i = this.protein.qtracks.length - 1;
+            this.paper.quantTrack(this.protein.qtracks[i], topY, this.W, uiOptions.graphHeight);
+
+            this.protein.qtracks[i].topY = topY;
+            this.H = Utils.calcHeight(this.protein);
+            this.W = this.protein.sequence.length;
+            this.paper.setSize(this.W, this.H);
+            this.setZoom(oldZoom);
+        };
+
+        protaelproto.addFTrack = function (track) {
+            var oldZoom = this.currentScale();
+            this.setZoom(1);
+
+            if (!this.protein.ftracks)
+                this.protein.ftracks = [];
+
+            this.protein.ftracks.push(track);
+            var topY = this.H - 5;
+            var i = this.protein.ftracks.length - 1;
+            this.paper.featureTrack(this.protein.ftracks[i], topY, this.W, uiOptions.graphHeight);
+
+            this.protein.ftracks[i].topY = topY;
+            this.H = Utils.calcHeight(this.protein);
+            this.W = this.protein.sequence.length;
+            this.paper.setSize(this.W, this.H);
+            this.setZoom(oldZoom);
+        };
+
         /**
          * Change current coloring schema
          * @param {type} CS

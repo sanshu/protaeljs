@@ -36,9 +36,10 @@
                     $('#savePNG').click(function () {
                         saveSvgAsPng(document.getElementById("protaelHolder_svgcanvas"), "protael_export.png");
                     });
+
                 });
 
-           
+
 
             function applyJSON() {
                 $(".protael_resizable").remove();
@@ -53,8 +54,32 @@
                         localStorage.testJson = t;
 
                         P.onMouseOver(function (e) {
-                           
+
 //                            console.log(P.toOriginalX(P.mouseToSvgXY(e).x));
+                        });
+                        var r = 1;
+                        $('#addQtrack').click(function () {
+                            var values = randomArray(t.sequence.length, 8);
+                            var q = {
+                                "label": "random qvalues " + r,
+                                "color": "teal",
+                                "type": "column",
+                                "values": values};
+                            P.addQTrack(q);
+                            var f = {
+                                "label": "random fvalues " + r,
+                                "color": "teal",
+                                "display": "block",
+                                "showLine": true,
+                                features: [
+                                    {"id": 0,
+                                        "start": values[0],
+                                        "end": values[0] + 10
+                                    }
+                                ]
+                            }
+                             P.addFTrack(f);
+                            r++;
                         });
                     } catch (err) {
                         console.log(err);
@@ -66,6 +91,12 @@
                     $("#errorMsg").html("Invalid JSON: " + err.message);
                     $("#errorMsg").show();
                 }
+            }
+
+            function randomArray(length, max) {
+                return Array.apply(null, Array(length)).map(function () {
+                    return Math.round(Math.random() * max);
+                });
             }
 
         </script>
@@ -107,6 +138,7 @@
                     <div id ="protaelHolder"  style="width:100%; position:absolute; left:300px;"> </div>
 
                     <button id="savePNG">savePNG</button>
+                    <button id="addQtrack">add tracks</button>
                 </div>
             </div>
         </div>
