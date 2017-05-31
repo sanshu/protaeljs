@@ -1156,38 +1156,37 @@ var Protael = (function () {
         function prepareQTValues(data, qtrack) {
             var vv = data;
 
-            var
-                min = Math.min.apply(null, vv);
+            var min = Math.min.apply(null, vv);
 
             if (qtrack.transform) {
-                var d = 0.00000000000001; // make sure there are no 0 values;
+
                 if (qtrack.transform === "log") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.log(e + d);
+                        a[i] = e ? Math.log(e) : 0;
                     });
                 } else if (qtrack.transform === "log2") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.log2(e + d);
+                        a[i] = e ? Math.log(e) : 0;
                     });
                 } else if (qtrack.transform === "log10") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.log10(e + d);
+                        a[i] = e ? Math.log(e) : 0;
                     });
                 } else if (qtrack.transform === "exp") {
                     vv.forEach(function (e, i, a) {
                         if (min < 0) {
                             e += min;
                         }
-                        a[i] = Math.exp(e + d);
+                        a[i] = Math.exp(e);
                     });
                 }
             }
@@ -1677,7 +1676,7 @@ var Protael = (function () {
                 self.protael.userMouseMove(e);
             });
 
-            paper.click(function(e){
+            paper.click(function (e) {
                 self.protael.userMouseClick(e);
             });
 
