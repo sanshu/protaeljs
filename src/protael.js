@@ -1350,10 +1350,10 @@ var Protael = (function () {
                     ox = parent.toOriginalX(x),
                     bb = tooltip.getBBox(),
                     txt = typeof data[ox - 1] !== "undefined" ? data[ox - 1] : "N/A";
-                if (qtrack.transform) {
-                    txt += ", " + qtrack.transform + "=";
-                    txt += typeof data[ox - 1] !== "undefined" ? vv[ox - 1].valueOf().toFixed(2) : "N/A";
-                }
+//                if (qtrack.transform) {
+//                    txt += ", " + qtrack.transform + "=";
+//                    txt += typeof data[ox - 1] !== "undefined" ? vv[ox - 1].valueOf().toFixed(2) : "N/A";
+//                }
                 if (bb.x2 > bgrect.getBBox().width / 2) {
                     tooltip.attr({"text-anchor": "end"});
                 } else {
