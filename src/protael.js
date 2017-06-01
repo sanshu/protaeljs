@@ -427,7 +427,6 @@ var Protael = (function () {
         this.H = Utils.calcHeight(this.protein);
         this.W = this.protein.sequence.length;
         this.paper.setSize(this.W, this.H);
-//        this.paper.axis(this.W, 10).toBack();
         newDiv.resizable({
             stop: function (ev, ui) {
                 self.zoomToFit();
@@ -526,6 +525,11 @@ var Protael = (function () {
                 x: w - 1, // - vbl.width-5,
                 y: h //- vbl.height-5
             });
+            Snap.selectAll(".pl-grid-major").attr({"y2":h});
+            Snap.selectAll(".pl-grid-minor").attr({"y2":h});
+            Snap.selectAll("#selector").attr({"height":h});
+            Snap.selectAll("#blanket").attr({"height":h});
+            Snap.selectAll("#pointer").attr({"height":h});
             return this;
         };
         /**
@@ -1068,7 +1072,7 @@ var Protael = (function () {
             }
             shapeGr = paper.g().attr({
                 id: feature.id || '',
-                title: feature.label,
+                title: feature.label || '',
                 fill: color,
                 'class': clazz
             });
@@ -1395,7 +1399,7 @@ var Protael = (function () {
                     "font-size": "10px",
                     "font-family": "Arial",
                     "text-anchor": "middle"
-                }, r, g;
+                };
             for (i = markers.length; i--; ) {
                 m = markers[i];
                 if (!m.x || m.x === "") {
