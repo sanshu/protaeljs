@@ -1956,12 +1956,12 @@ var Protael = (function () {
                 this.protein.qtracks = [];
 
             this.protein.qtracks.push(track);
-            var topY = this.H - 5;
+            var topY = this.H;
             var i = this.protein.qtracks.length - 1;
+            this.protein.qtracks[i].topY = topY;
             this.paper.quantTrack(this.protein.qtracks[i], topY, this.W, uiOptions.graphHeight);
 
-            this.protein.qtracks[i].topY = topY;
-            this.H = Utils.calcHeight(this.protein);
+            this.H = Utils.calcHeight(this.protein) +10;
             this.W = this.protein.sequence.length;
             this.paper.setSize(this.W, this.H);
             this.setZoom(oldZoom);
@@ -1977,10 +1977,10 @@ var Protael = (function () {
             this.protein.ftracks.push(track);
             var topY = this.H - 5;
             var i = this.protein.ftracks.length - 1;
-            this.paper.featureTrack(this.protein.ftracks[i], topY, this.W, uiOptions.graphHeight);
-
             this.protein.ftracks[i].topY = topY;
-            this.H = Utils.calcHeight(this.protein);
+            this.paper.featureTrack(this.protein.ftracks[i], topY, uiOptions.featureHeight, this.protein.ftracks[i].allowOverlap || false, true );
+
+            this.H = Utils.calcHeight(this.protein) +10;
             this.W = this.protein.sequence.length;
             this.paper.setSize(this.W, this.H);
             this.setZoom(oldZoom);
