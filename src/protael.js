@@ -1042,7 +1042,7 @@ var Protael = (function () {
                 }
             }
             if (!isOverlay) {
-                var label = paper.text(.1, 8, ftrack.label).attr({"class": "pl-ftrack-label"});
+                var label = paper.text(.1, -4, ftrack.label).attr({"class": "pl-ftrack-label"});
                 g.append(label);
 //                this.addOutsideLabel(label);
             }
