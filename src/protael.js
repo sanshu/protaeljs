@@ -102,7 +102,7 @@ var Protael = (function () {
             mainSeqHeight: 55,
             featureHeight: 15, // height of the feature track
             graphHeight: 50,
-            graphSpacing: 20,
+            graphSpacing: 30,
             space: 20
         },
         /**
@@ -424,9 +424,8 @@ var Protael = (function () {
         this.currShift = 0;
         this.showCursorTooltips = true;
         this.paper = new Paper(container, svg.width(), svg.height(), this);
-        this.H = Utils.calcHeight(this.protein);
         this.W = this.protein.sequence.length;
-        this.paper.setSize(this.W, this.H);
+        this.paper.setSize(this.W, 10);
         newDiv.resizable({
             stop: function (ev, ui) {
                 self.zoomToFit();
@@ -525,13 +524,19 @@ var Protael = (function () {
                 x: w - 1, // - vbl.width-5,
                 y: h //- vbl.height-5
             });
-            Snap.selectAll(".pl-grid-major").attr({"y2":h});
-            Snap.selectAll(".pl-grid-minor").attr({"y2":h});
-            Snap.selectAll("#selector").attr({"height":h});
-            Snap.selectAll("#blanket").attr({"height":h});
-            Snap.selectAll("#pointer").attr({"height":h});
+            Snap.selectAll(".pl-grid-major").attr({"y2": h});
+            Snap.selectAll(".pl-grid-minor").attr({"y2": h});
+            Snap.selectAll("#selector").attr({"height": h});
+            Snap.selectAll("#blanket").attr({"height": h});
+            Snap.selectAll("#pointer").attr({"height": h});
             return this;
         };
+
+        paperproto.updateSize = function () {
+            var bb = this.paper.getBBox();
+            this.setSize(bb.w, bb.h + 10);
+        };
+
         /**
          * Gets current paper width.
          * @returns {number}
@@ -637,7 +642,7 @@ var Protael = (function () {
         paperproto.axis = function (w, dx) {
             var i, maxI = w / dx + 1,
                 l, t,
-                H = this.protael.H,
+                H = this.paper.getBBox().h,
                 p = this.paper,
                 axesLabels = p.g().attr({
                 id: "gridLbls",
@@ -1333,11 +1338,12 @@ var Protael = (function () {
 
             var bgrect = paper.rect(0, 0, W, height).attr({"opacity": .0}),
                 tooltip = paper.text(.1, 0, max).attr({"class": "pl-chart-tooltip"}).hide(),
-                label = paper.text(.1, 0, qtrack.label).attr({"class": "pl-chart-label"}),
+                label = paper.text(.1, -.1, qtrack.label).attr({"class": "pl-chart-label"}),
                 topLine = paper.line(0, 0, W, 0).attr({"class": "pl-chart-top"}),
                 cLine = paper.line(0, max * ky, W, max * ky).attr({"class": "pl-chart-center"}),
                 bottomLine = paper.line(0, height, W, height).attr({"class": "pl-chart-bottom"}),
-                g = paper.g(chart2, topLine, bottomLine, cLine, label, tooltip, bgrect).attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
+                g = paper.g(chart2, topLine, bottomLine, cLine, label, tooltip, bgrect)
+                .attr({id: "qtrack_" + qtrack.label, class: 'pl-chart'}).transform("translate(0, " + topY + ")");
 
             if (qtrack.displayScale) {
                 g.add(lTop, lBottom);
@@ -1562,22 +1568,22 @@ var Protael = (function () {
             counterMax = protein.ftracks ? protein.ftracks.length : 0;
             for (i = 0; i < counterMax; i++) {
                 allowOver = protein.ftracks[i].allowOverlap || false;
+                topY = this.paper.getBBox().h + uiOptions.space;
                 delta = this.featureTrack(protein.ftracks[i], topY, uiOptions.featureHeight,
                     allowOver, true);
-                topY += uiOptions.featureHeight * delta + uiOptions.space;
             }
 
             counterMax = protein.qtracks ? protein.qtracks.length : 0;
             for (i = 0; i < counterMax; i++) {
                 if (protein.qtracks[i].values && protein.qtracks[i].values.length) {
+                    topY = this.paper.getBBox().h + uiOptions.graphSpacing;
                     this.quantTrack(protein.qtracks[i], topY, this.protael.W, uiOptions.graphHeight);
                     protein.qtracks[i].topY = topY;
-                    topY += uiOptions.graphHeight + uiOptions.space;
                 } else {
                     console.log("No values found for QTRACK [" + i + "]. Skipping.");
                 }
             }
-
+            topY = this.paper.getBBox().h + uiOptions.graphSpacing;
             this.aliTop = topY;
             var show = protein.alidisplay ? true : false; // show MAS letters?
 
@@ -1594,7 +1600,7 @@ var Protael = (function () {
                     }
                 }
             }
-            this.protael.H = topY + 5;
+            var H = this.paper.getBBox().h + 5;
             this.axis(this.protael.W, 10).toBack();
 
             this.gSequences.add(this.seqLabelsSet, this.seqBGSet, this.seqChars, this.seqLines);
@@ -1604,12 +1610,12 @@ var Protael = (function () {
             this.seqLines.toBack();
             this.gAxes.toBack();
 
-            this.paper.attr({'height': this.protael.H});
+            this.paper.attr({'height': H});
             this.pLink.attr({
-                y: this.protael.H
+                y: H
             });
             // rect to show current position
-            this.selector = paper.rect(-1, 0, 0, this.protael.H).attr({
+            this.selector = paper.rect(-1, 0, 0, H).attr({
                 fill: '#DDD',
                 stroke: "#666",
                 "stroke-width": "2px",
@@ -1618,7 +1624,7 @@ var Protael = (function () {
             }).hide();
             // rect to show selection
 
-            this.pointer = paper.rect(0, 0, 1, this.protael.H).attr({
+            this.pointer = paper.rect(0, 0, 1, H).attr({
                 fill: 'green',
                 stroke: 'green',
                 "stroke-width": "1px",
@@ -1641,7 +1647,7 @@ var Protael = (function () {
             var self = this,
                 parent = this.protael,
                 // and we need a rect for catching mouse event for the whole chart area
-                r = paper.rect(0, 0, parent.W, parent.H).toBack().attr({
+                r = paper.rect(0, 0, parent.W, H).toBack().attr({
                 stroke: "#fff",
                 opacity: 0,
                 id: "blanket"
@@ -1712,22 +1718,7 @@ var Protael = (function () {
     }(Paper.prototype));
     Protael.Paper = Paper;
     Protael.prototype.Utils = {};
-    Protael.prototype.Utils.calcHeight = function (protein) {
-        var h = uiOptions.mainSeqHeight, // main sequence
-            y = 0;
-        if (protein.ftracks && protein.ftracks.length) {
-            h += uiOptions.featureHeight * (protein.ftracks.length + 2);
-        }
-        if (protein.qtracks) {
-            h += (uiOptions.graphHeight + uiOptions.space) * (protein.qtracks.length);
-        }
 
-        if (protein.alignments) {
-            y = protein.alidisplay ? 15 : 10;
-            h += (y * protein.alignments.length);
-        }
-        return h + 20;
-    };
     /**
      * Splits string data using ',' or into individual residues
      * @param {type} data
@@ -1956,14 +1947,13 @@ var Protael = (function () {
                 this.protein.qtracks = [];
 
             this.protein.qtracks.push(track);
-            var topY = this.H;
+            var bb = this.paper.paper.getBBox();
+            var topY = bb.h + uiOptions.graphSpacing;
             var i = this.protein.qtracks.length - 1;
             this.protein.qtracks[i].topY = topY;
             this.paper.quantTrack(this.protein.qtracks[i], topY, this.W, uiOptions.graphHeight);
 
-            this.H = Utils.calcHeight(this.protein) +10;
-            this.W = this.protein.sequence.length;
-            this.paper.setSize(this.W, this.H);
+            this.paper.updateSize();
             this.setZoom(oldZoom);
         };
 
@@ -1975,14 +1965,14 @@ var Protael = (function () {
                 this.protein.ftracks = [];
 
             this.protein.ftracks.push(track);
-            var topY = this.H - 5;
+            var bb = this.paper.paper.getBBox();
+
+            var topY = bb.h + uiOptions.space;
             var i = this.protein.ftracks.length - 1;
             this.protein.ftracks[i].topY = topY;
-            this.paper.featureTrack(this.protein.ftracks[i], topY, uiOptions.featureHeight, this.protein.ftracks[i].allowOverlap || false, true );
+            this.paper.featureTrack(this.protein.ftracks[i], topY, uiOptions.featureHeight, this.protein.ftracks[i].allowOverlap || false, true);
 
-            this.H = Utils.calcHeight(this.protein) +10;
-            this.W = this.protein.sequence.length;
-            this.paper.setSize(this.W, this.H);
+            this.paper.updateSize();
             this.setZoom(oldZoom);
         };
 
