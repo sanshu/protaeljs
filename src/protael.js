@@ -1164,31 +1164,43 @@ var Protael = (function () {
 
         function prepareQTValues(data, qtrack) {
             var vv = data;
-
+            var noZeros = qtrack.forceNonZero;
             var min = Math.min.apply(null, vv);
 
             if (qtrack.transform) {
 
                 if (qtrack.transform === "log") {
                     vv.forEach(function (e, i, a) {
-                        if (min < 0) {
-                            e += min;
+                        if (noZeros && e === 1) {
+                            a[i] = .5;
+                        } else {
+                            if (min < 0) {  //no log for negative values! shift
+                                e += min;
+                            }
+                            a[i] = e ? Math.log(e) : 0;
                         }
-                        a[i] = e ? Math.log(e) : 0;
                     });
                 } else if (qtrack.transform === "log2") {
                     vv.forEach(function (e, i, a) {
-                        if (min < 0) {
-                            e += min;
+                        if (noZeros && e === 1) {
+                            a[i] = .5;
+                        } else {
+                            if (min < 0) {
+                                e += min;
+                            }
+                            a[i] = e ? Math.log(e) : 0;
                         }
-                        a[i] = e ? Math.log(e) : 0;
                     });
                 } else if (qtrack.transform === "log10") {
                     vv.forEach(function (e, i, a) {
-                        if (min < 0) {
-                            e += min;
+                        if (noZeros && e === 1) {
+                            a[i] = .5;
+                        } else {
+                            if (min < 0) {
+                                e += min;
+                            }
+                            a[i] = e ? Math.log(e) : 0;
                         }
-                        a[i] = e ? Math.log(e) : 0;
                     });
                 } else if (qtrack.transform === "exp") {
                     vv.forEach(function (e, i, a) {
