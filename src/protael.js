@@ -1066,7 +1066,7 @@ var Protael = (function () {
             }
 
             if (color) {
-                shape.attr({fill: color});
+                shape.attr({fill: color, stroke: color});
             }
             if (allowOverlaps) {
                 shape.attr({opacity: .6});
