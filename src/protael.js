@@ -1577,6 +1577,7 @@ var Protael = (function () {
                 "text-anchor": "start",
                 id: "cursor"
             }).hide();
+
             counterMax = protein.ftracks ? protein.ftracks.length : 0;
             for (i = 0; i < counterMax; i++) {
                 allowOver = protein.ftracks[i].allowOverlap || false;
@@ -1663,9 +1664,8 @@ var Protael = (function () {
                 stroke: "#fff",
                 opacity: 0,
                 id: "blanket"
-            }),
-                elBlanket = $("#" + parent.container + ' #blanket');
-            ;
+            });
+            
             this.gLabels.add(residueBg, residueLabel);
 
             var dragStart = function (x, y, e) {
