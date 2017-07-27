@@ -526,9 +526,7 @@ var Protael = (function () {
             });
             Snap.selectAll(".pl-grid-major").attr({"y2": h});
             Snap.selectAll(".pl-grid-minor").attr({"y2": h});
-            Snap.selectAll("#selector").attr({"height": h});
-            Snap.selectAll("#blanket").attr({"height": h});
-            Snap.selectAll("#pointer").attr({"height": h});
+            Snap.selectAll(".pl-yzoomable").attr({"height": h});
             return this;
         };
 
@@ -1528,6 +1526,22 @@ var Protael = (function () {
                 group.add(gb);
             }
         };
+
+        paperproto.addHighlight = function (highlight, H) {
+            var rect = this.paper.rect(highlight.start, 0, (highlight.end - highlight.start), H).attr({
+                fill: highlight.color || "#f4ff81",
+                stroke: highlight.color || "f4ff81",
+                "stroke-width": "2px",
+                opacity: highlight.opacity || .3,
+                title: highlight.description || "",
+                class: "pl-yzoomable",
+                id: highlight.id || "hlght-" + highlight.start - 1 + "-" + highlight.end
+            });
+
+            this.viewSet.push(rect);
+            return rect;
+        };
+
         paperproto.draw = function (protein) {
             var scolors = [],
                 chars = protein.sequence.toUpperCase().split(''),
@@ -1614,6 +1628,11 @@ var Protael = (function () {
                 }
             }
             var H = this.paper.getBBox().h + 5;
+
+            counterMax = protein.highlights ? protein.highlights.length : 0;
+            for (i = 0; i < counterMax; i++) {
+                this.addHighlight(protein.highlights[i], H).toBack();
+            }
             this.axis(this.protael.W, 10).toBack();
 
             this.gSequences.add(this.seqLabelsSet, this.seqBGSet, this.seqChars, this.seqLines);
@@ -1633,7 +1652,8 @@ var Protael = (function () {
                 stroke: "#666",
                 "stroke-width": "2px",
                 opacity: .5,
-                id: "selector"
+                id: "selector",
+                class: "pl-yzoomable"
             }).hide();
             // rect to show selection
 
@@ -1642,7 +1662,8 @@ var Protael = (function () {
                 stroke: 'green',
                 "stroke-width": "1px",
                 opacity: .7,
-                id: "pointer"
+                id: "pointer",
+                class: "pl-yzoomable"
             });
             this.viewSet.push(this.selector);
             var residueBg = paper.rect(0, 46, 22, 20, 4, 4).attr({
@@ -1656,16 +1677,16 @@ var Protael = (function () {
             });
             this.seqLineCovers.toFront();
 
-
             var self = this,
                 parent = this.protael,
                 // and we need a rect for catching mouse event for the whole chart area
                 r = paper.rect(0, 0, parent.W, H).toBack().attr({
                 stroke: "#fff",
                 opacity: 0,
-                id: "blanket"
+                id: "blanket",
+                class: "pl-yzoomable"
             });
-            
+
             this.gLabels.add(residueBg, residueLabel);
 
             var dragStart = function (x, y, e) {
@@ -1999,12 +2020,22 @@ var Protael = (function () {
             return this;
         };
         /**
-         * Wrapper ro Snap.slectAll to make it look more jquery-like
+         * Wrapper ro Snap.selectAll to make it look more jquery-like
          * @param {type} query
          */
         protaelproto.select = function (query) {
             return Snap.selectAll(query);
         };
+        /**
+         * Removes elements from view using CSS query selector
+         * @param {type} query
+         * @return {undefined}
+         */
+        protaelproto.remove = function (query) {
+            Snap.selectAll(query).remove();
+        };
+
+
         /**
          * Get current vew as SVG string.
          * @returns SVG string
