@@ -57,11 +57,16 @@
 
 //                            console.log(P.toOriginalX(P.mouseToSvgXY(e).x));
                         });
-                        
-                         P.onClick(function (e) {
+
+                        P.onClick(function (e) {
 
 //                            alert(P.toOriginalX(P.mouseToSvgXY(e).x));
                         });
+
+                        $('#remove').click(function () {
+                            testRemove ($("#query").val(), P);
+                        });
+
                         var r = 1;
                         $('#addQtrack').click(function () {
                             var values = randomArray(t.sequence.length, 8);
@@ -83,7 +88,7 @@
                                     }
                                 ]
                             };
-                             P.addFTrack(f);
+                            P.addFTrack(f);
                             r++;
                         });
                     } catch (err) {
@@ -102,6 +107,10 @@
                 return Array.apply(null, Array(length)).map(function () {
                     return Math.round(Math.random() * max);
                 });
+            }
+
+            function testRemove(query, P) {
+                P.remove(query);
             }
 
         </script>
@@ -144,6 +153,9 @@
 
                     <button id="savePNG">savePNG</button>
                     <button id="addQtrack">add tracks</button>
+                    <br />
+                    <input type="text" id="query" />
+                    <button id="remove">testRemove</button>
                 </div>
             </div>
         </div>
