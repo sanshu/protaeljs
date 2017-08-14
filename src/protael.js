@@ -1,4 +1,4 @@
-/**
+ /**
  * Extend SnapSVG Element
  * TODO: check next snapsvg release for native implementations!
  */
@@ -1363,7 +1363,9 @@ var Protael = (function () {
             /**** Try out for draggable elements*/
             g.dragVertical();
 
-            g.attr({"title": qtrack.label});
+            g.attr({
+                "title": qtrack.label,
+                "id": qtrack.id || "qtrack_"+ qtrack._idx});
 
             g.mousemove(function (e) {
                 var x = $("#" + parent.container + ' #pointer').first().attr("x"),
