@@ -1007,7 +1007,7 @@ var Protael = (function () {
                             seenDeltas.push(delta);
                         if (ft.draw_level !== lastLevel)
                             lastX = 0;
-                        if (ft.start >= lastX) {
+                        if (ft.start > lastX) {
                             var featureGroup = this.feature(ft, ft.color || color,
                                 display, 0 + delta, height, g, true, allowOverlaps, isOverlay);
                             if (ft.click) {
@@ -1550,8 +1550,7 @@ var Protael = (function () {
                 topY = 35,
                 drawingTop = 20,
                 paper = this.paper,
-                i, counterMax,
-                allowOver, delta;
+                i, counterMax;
             if (protein.markers) {
                 this.proteinMarkers(protein.markers, drawingTop);
             }
@@ -1596,9 +1595,9 @@ var Protael = (function () {
 
             counterMax = protein.ftracks ? protein.ftracks.length : 0;
             for (i = 0; i < counterMax; i++) {
-                allowOver = protein.ftracks[i].allowOverlap || false;
+                var allowOver = protein.ftracks[i].allowOverlap || false;
                 topY = this.paper.getBBox().h + uiOptions.space;
-                delta = this.featureTrack(protein.ftracks[i], topY, uiOptions.featureHeight,
+                this.featureTrack(protein.ftracks[i], topY, uiOptions.featureHeight,
                     allowOver, true);
             }
 
