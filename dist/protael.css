@@ -91,7 +91,7 @@ text
     cursor: pointer;
 }
 /* GRAPH ELEMENTS*/
-svg{
+.protael_svg svg{
     background: #FFF;
     -webkit-user-select: none;  /* Chrome all / Safari all */
     -moz-user-select: none;     /* Firefox all */

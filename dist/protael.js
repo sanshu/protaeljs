@@ -1,4 +1,4 @@
- /**
+/**
  * Extend SnapSVG Element
  * TODO: check next snapsvg release for native implementations!
  */
@@ -458,7 +458,7 @@ var Protael = (function () {
 
         this.pLink = p.text(0, 0, "Powered by Protael").attr({"id": "prref"});
         this.pLink.click(function () {
-            window.open("http://proteins.burnham.org:8080/Protael/");
+            window.open("http://protael.org/");
         });
         this.viewSet = Snap.set(); // contains all objects for scaling
         this.textSet = Snap.set(); // contains all text elements of the canvas
@@ -1365,7 +1365,7 @@ var Protael = (function () {
 
             g.attr({
                 "title": qtrack.label,
-                "id": qtrack.id || "qtrack_"+ qtrack._idx});
+                "id": qtrack.id || "qtrack_" + qtrack._idx});
 
             g.mousemove(function (e) {
                 var x = $("#" + parent.container + ' #pointer').first().attr("x"),
@@ -1667,14 +1667,17 @@ var Protael = (function () {
                 class: "pl-yzoomable"
             });
             this.viewSet.push(this.selector);
-            var residueBg = paper.rect(0, 46, 22, 20, 4, 4).attr({
+            var residueBg = paper.rect(-4, 46, 22, 20, 4, 4).attr({
                 fill: "#000",
-                stroke: "black",
+                stroke: "white",
                 color: "white",
                 "stroke-width": "2px",
-                opacity: .7
+                opacity: .7,
+                id: "res-label-box"
             }), residueLabel = paper.text(0, 60, '').attr({
-                fill: "white"
+                fill: "white",
+                id: "res-label",
+                "class": "ui-widget ui-tooltip"
             });
             this.seqLineCovers.toFront();
 
@@ -1707,9 +1710,19 @@ var Protael = (function () {
             paper.drag(dragMove, dragStart, dragEnd);
 
             var onMouseMove = function (e) {
+                var x = parent.mouseToSvgXY(e).x;
+                var OX = parent.toOriginalX(x) - 1;
+
+                residueLabel.node.textContent = chars[OX] + ": " + (OX + 1);
+
+                residueBg.attr({
+                    width: residueLabel.getBBox().width + 8
+                });
+                //
+                self.gLabels.transform("T " + (x + 6) + " 0").show();
                 //adding 2 to shift it a bit from the mouse
                 self.pointer.attr({
-                    'x': parent.mouseToSvgXY(e).x + 2
+                    'x': x + 2
                 });
             };
             self.pointer.mousemove(function (e) {
